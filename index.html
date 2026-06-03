@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solicitud de viáticos · SiteMinder México</title>
+<style>
+  :root {
+    --navy: #003F87;
+    --navy-dark: #002B5C;
+    --blue: #0066CC;
+    --blue-light: #E8F1FB;
+    --bg: #F5F7FA;
+    --card: #FFFFFF;
+    --border: #E5EAF0;
+    --border-strong: #CED5DE;
+    --text: #1A2332;
+    --muted: #6B7280;
+    --muted-2: #9CA3AF;
+    --success: #065F46;
+    --success-bg: #D1FAE5;
+    --danger: #991B1B;
+    --danger-bg: #FEE2E2;
+    --danger-border: #DC2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .container { max-width: 820px; margin: 0 auto; padding: 32px 20px 80px; }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .brand-mark { width: 38px; height: 38px; background: var(--navy); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 13px; letter-spacing: 0.5px; flex-shrink: 0; }
+  .brand-eyebrow { font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .brand-co { font-size: 14px; font-weight: 600; margin-top: 2px; color: var(--text); }
+  h1 { font-size: 28px; font-weight: 600; margin: 0 0 6px; letter-spacing: -0.5px; }
+  .subtitle { font-size: 14px; color: var(--muted); margin: 0 0 26px; }
+  .total-card {
+    background: var(--navy);
+    color: white;
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+  .total-label { font-size: 11px; opacity: 0.75; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 6px; font-weight: 500; }
+  .total-amount { font-size: 32px; font-weight: 600; margin: 0; letter-spacing: -1px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .total-side { text-align: right; font-size: 12px; opacity: 0.88; line-height: 1.7; font-variant-numeric: tabular-nums; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 18px; }
+  .card h2 { font-size: 16px; font-weight: 600; margin: 0 0 16px; display: flex; align-items: center; gap: 9px; }
+  .card h2 .dot { width: 6px; height: 6px; background: var(--blue); border-radius: 50%; }
+  .hint { font-size: 13px; color: var(--muted); margin: -6px 0 14px; line-height: 1.5; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .field label .req { color: var(--danger-border); margin-left: 1px; }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font: inherit; font-size: 14px; background: white; color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.12);
+  }
+  .field input:invalid:not(:focus):not(:placeholder-shown) { border-color: var(--danger-border); }
+  .readonly { padding: 10px 12px; background: #F3F5F8; border-radius: 8px; font-size: 14px; color: var(--muted); border: 1px solid var(--border); min-height: 40px; display: flex; align-items: center; }
+  .seg { display: inline-flex; background: #F3F5F8; padding: 3px; border-radius: 8px; margin-bottom: 14px; }
+  .seg button { padding: 7px 18px; font-size: 13px; border: none; background: transparent; border-radius: 6px; cursor: pointer; color: var(--muted); font-weight: 500; transition: all 0.15s; }
+  .seg button.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .row { display: grid; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid #F1F3F7; }
+  .row-tope { grid-template-columns: minmax(0,1fr) 105px 75px 100px; }
+  .row-mkt { grid-template-columns: minmax(0,1fr) 140px; }
+  .row:last-child { border-bottom: none; padding-bottom: 4px; }
+  .row:first-of-type { padding-top: 4px; }
+  .cn-name { font-size: 14px; line-height: 1.4; font-weight: 500; }
+  .cn-sub { font-size: 12px; color: var(--muted); margin-top: 2px; font-weight: 400; }
+  .cn-tope { font-size: 13px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; line-height: 1.4; }
+  .cn-tope .u { font-size: 11px; display: block; color: var(--muted-2); }
+  .qty, .mkt-amt { width: 100%; text-align: right; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+  .cn-amt { text-align: right; font-size: 16px; font-weight: 600; color: var(--blue); font-variant-numeric: tabular-nums; }
+  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+  .btn { padding: 12px 28px; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--navy); color: white; border: none; border-radius: 8px; transition: background 0.15s; }
+  .btn:hover:not(:disabled) { background: var(--navy-dark); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary { padding: 12px 22px; font-size: 14px; cursor: pointer; background: white; color: var(--text); border: 1px solid var(--border-strong); border-radius: 8px; font-weight: 500; }
+  .btn-secondary:hover { background: #F3F5F8; }
+  .footer-note { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 22px 0 0; padding: 14px 18px; background: var(--blue-light); border-radius: 8px; border-left: 3px solid var(--blue); }
+  .footer-note strong { color: var(--navy); font-weight: 600; }
+  .status { padding: 14px 18px; border-radius: 8px; margin-top: 18px; display: none; align-items: flex-start; gap: 12px; }
+  .status.show { display: flex; }
+  .status.success { background: var(--success-bg); color: var(--success); }
+  .status.error { background: var(--danger-bg); color: var(--danger); }
+  .status-icon { flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; }
+  .status-title { font-weight: 600; font-size: 14px; }
+  .status-detail { font-size: 13px; opacity: 0.92; margin-top: 4px; line-height: 1.5; }
+  .id-pill { display: inline-block; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; font-family: ui-monospace, 'SF Mono', Consolas, monospace; font-size: 12px; margin-left: 4px; }
+  @media (max-width: 640px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .total-card { flex-direction: column; align-items: flex-start; }
+    .total-side { text-align: left; }
+    .total-amount { font-size: 28px; }
+    .row-tope { grid-template-columns: 1fr 1fr; row-gap: 6px; column-gap: 10px; padding: 14px 0; }
+    .row-tope > div.cn-block { grid-column: 1 / -1; }
+    .row-tope .cn-tope { grid-column: 1 / -1; text-align: left; font-size: 11px; }
+    .row-tope .cn-tope .u { display: inline; margin-left: 6px; }
+    .row-tope .qty { grid-column: 1; }
+    .row-tope .cn-amt { grid-column: 2; }
+    .container { padding: 20px 14px 50px; }
+    .actions { flex-direction: column-reverse; }
+    .btn, .btn-secondary { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="brand">
+  <div class="brand-mark">SM</div>
+  <div>
+    <div class="brand-eyebrow">SiteMinder México · Sinergia Corporativo</div>
+    <div class="brand-co">Operaciones LATAM</div>
+  </div>
+</div>
+
+<h1>Solicitud de viáticos</h1>
+<p class="subtitle">Llena la información de tu viaje. El monto se calcula automáticamente conforme al Anexo B y se dispersa en tu tarjeta Minu.</p>
+
+<div class="total-card">
+  <div>
+    <p class="total-label">Total a dispersar en tarjeta Minu</p>
+    <p class="total-amount" id="grand">$0</p>
+  </div>
+  <div class="total-side">
+    Con tope · <span id="sub-tope">$0</span><br>
+    Tarifa mercado · <span id="sub-mkt">$0</span>
+  </div>
+</div>
+
+<form id="vt-form" autocomplete="off" novalidate>
+
+<div class="card">
+  <h2><span class="dot"></span>Datos del colaborador</h2>
+  <div class="grid-2">
+    <div class="field"><label>Nombre completo<span class="req">*</span></label><input type="text" name="colaborador" required placeholder="Nombre y apellido"></div>
+    <div class="field"><label>Correo del colaborador<span class="req">*</span></label><input type="email" name="colaborador_email" required placeholder="nombre@siteminder.com"></div>
+    <div class="field"><label>Puesto / cargo<span class="req">*</span></label><input type="text" name="puesto" required></div>
+    <div class="field"><label>Área / departamento<span class="req">*</span></label><input type="text" name="area" required></div>
+    <div class="field" style="grid-column: 1 / -1;"><label>Correo del líder directo<span class="req">*</span></label><input type="email" name="lider_email" required placeholder="lider@siteminder.com"></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2><span class="dot"></span>Datos del viaje</h2>
+  <div class="seg" id="seg-tipo" role="radiogroup" aria-label="Tipo de viaje">
+    <button type="button" class="active" data-tipo="Nacional">Nacional</button>
+    <button type="button" data-tipo="Internacional">Internacional</button>
+  </div>
+  <input type="hidden" name="tipo_viaje" value="Nacional">
+  <div class="grid-2" style="margin-bottom: 12px;">
+    <div class="field"><label>Destino<span class="req">*</span></label><input type="text" name="destino" required placeholder="Ciudad / país"></div>
+    <div class="field"><label>Motivo / justificación de negocio<span class="req">*</span></label><input type="text" name="motivo" required placeholder="¿Para qué viajas?"></div>
+  </div>
+  <div class="grid-3">
+    <div class="field"><label>Fecha de salida<span class="req">*</span></label><input type="date" name="fecha_salida" id="salida" required></div>
+    <div class="field"><label>Fecha de regreso<span class="req">*</span></label><input type="date" name="fecha_regreso" id="regreso" required></div>
+    <div class="field"><label>Días del viaje</label><div class="readonly" id="dias">—</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2><span class="dot"></span>Conceptos con tope</h2>
+  <p class="hint">Captura la cantidad. El monto se calcula automáticamente conforme al Anexo B. Los topes cambian según el tipo de viaje.</p>
+
+  <div class="row row-tope">
+    <div class="cn-block">
+      <div class="cn-name">Alimentación</div>
+      <div class="cn-sub">3 comidas/día, distribución libre</div>
+    </div>
+    <div class="cn-tope"><span id="tope-alimentacion">$750</span><span class="u">por día</span></div>
+    <input type="number" min="0" step="1" class="qty" data-key="alimentacion" placeholder="0">
+    <div class="cn-amt" id="m-alimentacion">$0</div>
+  </div>
+
+  <div class="row row-tope">
+    <div class="cn-block">
+      <div class="cn-name">Hospedaje</div>
+      <div class="cn-sub">Reserva por NAVAN (prepago)</div>
+    </div>
+    <div class="cn-tope"><span id="tope-hospedaje">$3,000</span><span class="u">por noche</span></div>
+    <input type="number" min="0" step="1" class="qty" data-key="hospedaje" placeholder="0">
+    <div class="cn-amt" id="m-hospedaje">$0</div>
+  </div>
+
+  <div class="row row-tope">
+    <div class="cn-block">
+      <div class="cn-name">Transporte local (Uber / taxi)</div>
+      <div class="cn-sub">Recibo digital o CFDI. No DiDi</div>
+    </div>
+    <div class="cn-tope"><span id="tope-transporte_local">$500</span><span class="u">por trayecto</span></div>
+    <input type="number" min="0" step="1" class="qty" data-key="transporte_local" placeholder="0">
+    <div class="cn-amt" id="m-transporte_local">$0</div>
+  </div>
+
+  <div class="row row-tope">
+    <div class="cn-block">
+      <div class="cn-name">Renta de automóvil</div>
+      <div class="cn-sub">Máximo 7 días · aprobación de Finanzas</div>
+    </div>
+    <div class="cn-tope"><span id="tope-renta_auto">$850</span><span class="u">por día (máx. 7)</span></div>
+    <input type="number" min="0" step="1" class="qty" data-key="renta_auto" placeholder="0">
+    <div class="cn-amt" id="m-renta_auto">$0</div>
+  </div>
+
+  <div class="row row-tope">
+    <div class="cn-block">
+      <div class="cn-name">Comunicaciones</div>
+      <div class="cn-sub">Roaming / datos / WiFi · solo internacional</div>
+    </div>
+    <div class="cn-tope"><span id="tope-comunicaciones">$0</span><span class="u">por día</span></div>
+    <input type="number" min="0" step="1" class="qty" data-key="comunicaciones" placeholder="0">
+    <div class="cn-amt" id="m-comunicaciones">$0</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2><span class="dot"></span>Conceptos de tarifa de mercado</h2>
+  <p class="hint">Captura el monto estimado en pesos. Sujeto a validación de Finanzas y a comprobación con CFDI.</p>
+
+  <div class="row row-mkt">
+    <div>
+      <div class="cn-name">Transporte aéreo / tren / autobús</div>
+      <div class="cn-sub">Clase económica · por NAVAN</div>
+    </div>
+    <input type="number" min="0" step="1" class="mkt-amt" data-key="aereo" placeholder="$0">
+  </div>
+
+  <div class="row row-mkt">
+    <div>
+      <div class="cn-name">Combustible</div>
+      <div class="cn-sub">Monto real con comprobante</div>
+    </div>
+    <input type="number" min="0" step="1" class="mkt-amt" data-key="combustible" placeholder="$0">
+  </div>
+
+  <div class="row row-mkt">
+    <div>
+      <div class="cn-name">Peajes y casetas</div>
+      <div class="cn-sub">CFDI a nombre de SiteMinder</div>
+    </div>
+    <input type="number" min="0" step="1" class="mkt-amt" data-key="casetas" placeholder="$0">
+  </div>
+
+  <div class="row row-mkt">
+    <div>
+      <div class="cn-name">Cuotas de capacitación / congresos</div>
+      <div class="cn-sub">CFDI / factura local</div>
+    </div>
+    <input type="number" min="0" step="1" class="mkt-amt" data-key="capacitacion" placeholder="$0">
+  </div>
+</div>
+
+<div class="footer-note">
+  <strong>Importante.</strong> Este formato debe enviarse con al menos dos semanas de anticipación, salvo viajes de emergencia (sección 10.1 de la política). El monto aprobado se dispersa en tu tarjeta Minu. La tarjeta es medio de pago; no sustituye la comprobación con CFDI conforme a la sección 7 de la política.
+</div>
+
+<div class="status" id="status" role="alert" aria-live="polite"></div>
+
+<div class="actions">
+  <button type="reset" class="btn-secondary">Limpiar</button>
+  <button type="submit" class="btn" id="btn-submit">Enviar solicitud</button>
+</div>
+
+</form>
+
+</div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydr2FW8bEV3FRiOC2mTsaRlkF9opF-9_KvRD6qUE222GOWsJ62pWvOpKhR8N6raag5/exec';
+
+const TOPES = {
+  alimentacion:     { n: 750,  i: 1500, max: null },
+  hospedaje:        { n: 3000, i: 3850, max: null },
+  transporte_local: { n: 500,  i: 500,  max: null },
+  renta_auto:       { n: 850,  i: 850,  max: 7 },
+  comunicaciones:   { n: 0,    i: 500,  max: null }
+};
+const KEY_MAP_TOPE = {
+  alimentacion: 'dias_alimentacion',
+  hospedaje: 'noches_hospedaje',
+  transporte_local: 'trayectos_transporte_local',
+  renta_auto: 'dias_renta_auto',
+  comunicaciones: 'dias_comunicaciones'
+};
+const KEY_MAP_MKT = {
+  aereo: 'monto_aereo',
+  combustible: 'monto_combustible',
+  casetas: 'monto_casetas',
+  capacitacion: 'monto_capacitacion'
+};
+
+let tipo = 'Nacional';
+const fmt = n => '$' + Math.round(n).toLocaleString('es-MX');
+
+function recalc() {
+  const key = tipo === 'Nacional' ? 'n' : 'i';
+  let subT = 0;
+  Object.keys(TOPES).forEach(k => {
+    const t = TOPES[k][key];
+    const inp = document.querySelector('.qty[data-key="' + k + '"]');
+    let q = parseFloat(inp.value) || 0;
+    if (TOPES[k].max) q = Math.min(q, TOPES[k].max);
+    const m = q * t;
+    document.getElementById('m-' + k).textContent = fmt(m);
+    document.getElementById('tope-' + k).textContent = fmt(t);
+    subT += m;
+  });
+  let subM = 0;
+  document.querySelectorAll('.mkt-amt').forEach(el => { subM += parseFloat(el.value) || 0; });
+  document.getElementById('sub-tope').textContent = fmt(subT);
+  document.getElementById('sub-mkt').textContent = fmt(subM);
+  document.getElementById('grand').textContent = fmt(subT + subM);
+}
+
+document.querySelectorAll('#seg-tipo button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#seg-tipo button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  tipo = b.dataset.tipo;
+  document.querySelector('[name="tipo_viaje"]').value = tipo;
+  recalc();
+}));
+
+document.querySelectorAll('.qty, .mkt-amt').forEach(el => el.addEventListener('input', recalc));
+
+function calcDias() {
+  const s = document.getElementById('salida').value;
+  const r = document.getElementById('regreso').value;
+  const out = document.getElementById('dias');
+  if (!s || !r) { out.textContent = '—'; return; }
+  const ds = new Date(s), dr = new Date(r);
+  if (dr < ds) { out.textContent = 'rango inválido'; return; }
+  const dias = Math.round((dr - ds) / 86400000) + 1;
+  out.textContent = dias + (dias === 1 ? ' día' : ' días');
+}
+document.getElementById('salida').addEventListener('change', calcDias);
+document.getElementById('regreso').addEventListener('change', calcDias);
+
+const params = new URLSearchParams(location.search);
+['colaborador','colaborador_email','puesto','area','lider_email','destino','motivo'].forEach(n => {
+  const v = params.get(n);
+  if (v) { const el = document.querySelector('[name="' + n + '"]'); if (el) el.value = v; }
+});
+
+document.getElementById('vt-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+  const btn = document.getElementById('btn-submit');
+  const status = document.getElementById('status');
+  status.className = 'status';
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = 'Enviando…';
+
+  const fd = new FormData(form);
+  const payload = Object.fromEntries(fd);
+  Object.keys(TOPES).forEach(k => {
+    const el = document.querySelector('.qty[data-key="' + k + '"]');
+    payload[KEY_MAP_TOPE[k]] = parseFloat(el.value) || 0;
+  });
+  Object.keys(KEY_MAP_MKT).forEach(k => {
+    const el = document.querySelector('.mkt-amt[data-key="' + k + '"]');
+    payload[KEY_MAP_MKT[k]] = parseFloat(el.value) || 0;
+  });
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      redirect: 'follow'
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Error al procesar la solicitud.');
+    status.className = 'status show success';
+    status.innerHTML =
+      '<svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>' +
+      '<div><div class="status-title">Solicitud enviada correctamente.</div>' +
+      '<div class="status-detail">Recibirás un correo de confirmación. Tu líder directo, Finanzas SiteMinder y Sinergia Corporativo ya fueron notificados.<br>Identificador:<span class="id-pill">' + (data.solicitud_id || '—') + '</span></div></div>';
+    btn.textContent = 'Enviada ✓';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    status.className = 'status show error';
+    status.innerHTML =
+      '<svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>' +
+      '<div><div class="status-title">No se pudo enviar la solicitud.</div>' +
+      '<div class="status-detail">' + (err.message || 'Intenta de nuevo en un momento o avisa a Sinergia Corporativo.') + '</div></div>';
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+});
+
+document.getElementById('vt-form').addEventListener('reset', () => {
+  setTimeout(() => {
+    document.querySelectorAll('#seg-tipo button').forEach(x => x.classList.remove('active'));
+    document.querySelector('#seg-tipo button[data-tipo="Nacional"]').classList.add('active');
+    tipo = 'Nacional';
+    document.querySelector('[name="tipo_viaje"]').value = 'Nacional';
+    document.getElementById('dias').textContent = '—';
+    document.getElementById('status').className = 'status';
+    recalc();
+  }, 0);
+});
+
+recalc();
+</script>
+</body>
+</html>
