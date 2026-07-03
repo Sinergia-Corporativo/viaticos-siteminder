@@ -268,6 +268,23 @@
       <div class="readonly" id="dias">—</div>
     </div>
   </div>
+  <div class="grid-2" style="margin-top: 14px;">
+    <div class="field">
+      <label>Staying Social <span class="en">/ Event category</span></label>
+      <select name="staying_social" id="staying-social">
+        <option value="">— No aplica / N/A —</option>
+        <option>Staying Social con equipo</option>
+        <option>Representación con clientes</option>
+        <option>Representación con partners</option>
+        <option>Representación con proveedores</option>
+        <option>Capacitaciones</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Número de personas <span class="en">/ Number of attendees</span></label>
+      <input type="number" name="num_personas" id="num-personas" min="0" step="1" placeholder="0">
+    </div>
+  </div>
 </div>
 
 <div class="card">
@@ -458,7 +475,7 @@ document.getElementById('salida').addEventListener('change', calcDias);
 document.getElementById('regreso').addEventListener('change', calcDias);
 
 const params = new URLSearchParams(location.search);
-['colaborador','colaborador_email','puesto','area','lider_email','destino','motivo'].forEach(n => {
+['colaborador','colaborador_email','puesto','area','lider_email','destino','motivo','staying_social','num_personas'].forEach(n => {
   const v = params.get(n);
   if (v) { const el = document.querySelector('[name="' + n + '"]'); if (el) el.value = v; }
 });
