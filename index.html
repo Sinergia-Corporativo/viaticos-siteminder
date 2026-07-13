@@ -765,125 +765,97 @@ document.getElementById('vt-form').addEventListener('reset', () => {
 recalc();
 
 /* ── Staying Social logic ── */
-(function() {
-  const fmtSS = n => '$' + Number(n).toLocaleString('es-MX', {minimumFractionDigits:0}) + ' MXN';
+/* ── GLOBAL: Tipo de solicitud ── */
+let tipoSolicitud = '';
 
-  function ssApplyAuth(wrapId, badgeId, noteId, monto) {
-    const wrap = document.getElementById(wrapId);
-    wrap.style.display = monto > 0 ? 'block' : 'none';
-    if (monto <= 0) return;
-    const badge = document.getElementById(badgeId);
-    const note  = document.getElementById(noteId);
-    if (monto <= 1500) {
-      badge.className = 'ss-auth-badge ok';
-      badge.textContent = 'Líder directo';
-      note.style.display = 'none';
-    } else if (monto <= 5000) {
-      badge.className = 'ss-auth-badge warn';
-      badge.textContent = 'Líder directo + registro en BUK con descripción de contraparte';
-      note.style.display = 'none';
-    } else if (monto <= 15000) {
-      badge.className = 'ss-auth-badge warn';
-      badge.textContent = 'Finanzas SiteMinder + justificación escrita del objetivo comercial';
-      note.style.display = 'none';
-    } else {
-      badge.className = 'ss-auth-badge danger';
-      badge.textContent = 'Finanzas SiteMinder + Dirección SiteMinder';
-      note.style.display = 'flex';
+function setTipoSol(t) {
+  tipoSolicitud = t;
+  document.getElementById('btn-viaje').classList.toggle('active', t === 'viaje');
+  document.getElementById('btn-ss').classList.toggle('active', t === 'ss');
+  document.getElementById('modo-viaje').style.display = t === 'viaje' ? 'block' : 'none';
+  document.getElementById('modo-ss').style.display    = t === 'ss'    ? 'block' : 'none';
+  const tl = document.querySelector('.total-label');
+  if (tl) tl.textContent = t === 'ss' ? 'Monto del evento / Event amount' : 'Total a dispersar / Amount to disburse';
+  if (t === 'ss') recalcSS(); else recalc();
+}
+
+function calcDiasEvento() {
+  const ini = document.getElementById('ss-fecha-ini').value;
+  const fin = document.getElementById('ss-fecha-fin').value;
+  const el  = document.getElementById('ss-dias-evento');
+  if (ini) {
+    const d1 = new Date(ini), d2 = fin ? new Date(fin) : d1;
+    const dias = Math.max(1, Math.round((d2-d1)/86400000)+1);
+    el.textContent = dias + (dias===1 ? ' día' : ' días');
+  } else el.textContent = '—';
+}
+
+function ssAuthSA(wId, bId, tId, nId, monto) {
+  const w = document.getElementById(wId);
+  w.style.display = monto > 0 ? 'block' : 'none';
+  if (monto <= 0) return;
+  const b = document.getElementById(bId), t = document.getElementById(tId), n = document.getElementById(nId);
+  if (!t) return;
+  if (monto<=1500)        { b.className='ss-auth-badge ok';     t.textContent='Líder directo'; n.style.display='none'; }
+  else if (monto<=5000)   { b.className='ss-auth-badge warn';   t.textContent='Líder directo + registro en BUK'; n.style.display='none'; }
+  else if (monto<=15000)  { b.className='ss-auth-badge warn';   t.textContent='Finanzas SiteMinder + justificación escrita'; n.style.display='none'; }
+  else                     { b.className='ss-auth-badge danger'; t.textContent='Finanzas SiteMinder + Dirección SiteMinder'; n.style.display='flex'; }
+}
+
+function ssRunSA() {
+  const cat=document.getElementById('ss-cat-sa').value;
+  const tipoA=document.getElementById('ss-tipo-sa').value;
+  const nd=parseInt(document.getElementById('ss-ndestinatarios-sa').value)||1;
+  const montoEq=parseFloat(document.getElementById('ss-monto-eq-sa').value)||0;
+  const montoRep=parseFloat(document.getElementById('ss-monto-rep-sa').value)||0;
+  const montoCap=parseFloat(document.getElementById('ss-monto-cap-sa').value)||0;
+  const fmtSA=n=>'$'+Number(n).toLocaleString('es-MX',{minimumFractionDigits:0})+' MXN';
+  const isEq=cat==='equipo', isRep=['clientes','partners','proveedores'].includes(cat), isCap=cat==='capacitaciones';
+  document.getElementById('ss-subsec-sa').style.display=(isEq||isRep||isCap)?'block':'none';
+  document.getElementById('ss-eq-sa').style.display=isEq?'block':'none';
+  document.getElementById('ss-rep-sa').style.display=isRep?'block':'none';
+  document.getElementById('ss-cap-sa').style.display=isCap?'block':'none';
+  const hideNp=isRep&&tipoA==='obsequios';
+  document.getElementById('ss-np-sa').style.display=hideNp?'none':'block';
+  document.getElementById('ss-np-na-sa').style.display=hideNp?'block':'none';
+  if(isRep){
+    ['comidas','obsequios','eventos'].forEach(k=>document.getElementById('ss-'+k+'-extra-sa').style.display=tipoA===k?'block':'none');
+    const showTope=tipoA==='comidas'||tipoA==='obsequios';
+    document.getElementById('ss-tope-wrap-sa').style.display=showTope?'block':'none';
+    if(tipoA==='comidas'){
+      document.getElementById('ss-tope-val-sa').textContent=fmtSA(1500)+'/evento';
+      const exc=montoRep>0&&montoRep>1500;
+      document.getElementById('ss-tope-chip-sa').className='ss-tope-chip '+(exc?'exc':'ok');
+      document.getElementById('ss-tope-alert-sa').style.display=exc?'flex':'none';
+      if(exc) document.getElementById('ss-tope-alert-txt-sa').textContent='Excede el tope ('+fmtSA(1500)+'). Se requiere justificación.';
     }
+    if(tipoA==='obsequios'){
+      const topeOb=2000*nd;
+      document.getElementById('ss-tope-val-sa').textContent=fmtSA(2000)+'/persona × '+nd+' = '+fmtSA(topeOb)+' total';
+      document.getElementById('ss-obs-info-txt-sa').textContent='Límite: '+fmtSA(2000)+'/persona/año. Para '+nd+': máx. '+fmtSA(topeOb)+'.';
+      const exc=montoRep>0&&montoRep>topeOb;
+      document.getElementById('ss-tope-chip-sa').className='ss-tope-chip '+(exc?'exc':'ok');
+      document.getElementById('ss-tope-alert-sa').style.display=exc?'flex':'none';
+      if(exc) document.getElementById('ss-tope-alert-txt-sa').textContent='Excede el límite ('+fmtSA(topeOb)+'). La diferencia no es deducible.';
+    }
+    ssAuthSA('ss-auth-rep-sa-wrap','ss-auth-rep-sa-badge','ss-auth-rep-sa-txt','ss-auth-rep-sa-note',montoRep);
   }
+  if(isEq)  ssAuthSA('ss-auth-eq-sa-wrap','ss-auth-eq-sa-badge','ss-auth-eq-sa-txt','ss-auth-eq-sa-note',montoEq);
+  if(isCap) ssAuthSA('ss-auth-cap-sa-wrap','ss-auth-cap-sa-badge','ss-auth-cap-sa-txt','ss-auth-cap-sa-note',montoCap);
+  recalcSS();
+}
 
-  function ssRun() {
-    const ss   = document.getElementById('staying-social').value;
-    const tipo = document.getElementById('ss-tipo').value;
-    const nd   = parseInt(document.getElementById('ss-ndestinatarios').value) || 1;
-    const montoEq  = parseFloat(document.getElementById('ss-monto-eq').value)  || 0;
-    const montoRep = parseFloat(document.getElementById('ss-monto-rep').value) || 0;
-    const montoCap = parseFloat(document.getElementById('ss-monto-cap').value) || 0;
-    const topeComidas   = tipo === 'Nacional' ? 1500 : 2500;  // usa var global `tipo` del form
-    const topeObsequios = 2000 * nd;
+function recalcSS() {
+  const cat=document.getElementById('ss-cat-sa').value;
+  const isRep=['clientes','partners','proveedores'].includes(cat);
+  let total=0;
+  if(cat==='equipo') total=parseFloat(document.getElementById('ss-monto-eq-sa').value)||0;
+  else if(isRep)     total=parseFloat(document.getElementById('ss-monto-rep-sa').value)||0;
+  else if(cat==='capacitaciones') total=parseFloat(document.getElementById('ss-monto-cap-sa').value)||0;
+  const el=document.querySelector('.total-amount');
+  if(el) el.textContent='$'+Math.round(total).toLocaleString('es-MX');
+}
 
-    const isEq  = ss === 'equipo';
-    const isRep = ss === 'clientes' || ss === 'partners' || ss === 'proveedores';
-    const isCap = ss === 'capacitaciones';
-    const showSub = isEq || isRep || isCap;
-
-    document.getElementById('ss-subsec').style.display = showSub ? 'block' : 'none';
-    document.getElementById('ss-eq').style.display     = isEq  ? 'block' : 'none';
-    document.getElementById('ss-rep').style.display    = isRep ? 'block' : 'none';
-    document.getElementById('ss-cap').style.display    = isCap ? 'block' : 'none';
-
-    // Número de personas → N/A cuando es N/A o Obsequios
-    const hideNp = !ss || (isRep && tipo === 'obsequios');
-    document.getElementById('num-personas').style.display = hideNp ? 'none'  : 'block';
-    document.getElementById('np-na').style.display        = hideNp ? 'block' : 'none';
-
-    // ── EQUIPO ──
-    if (isEq) {
-      ssApplyAuth('ss-auth-eq-wrap', 'ss-auth-eq-badge', 'ss-auth-eq-note', montoEq);
-    }
-
-    // ── REPRESENTACIÓN ──
-    if (isRep) {
-      const isObsequios = (tipo === 'obsequios');
-      document.getElementById('num-personas').style.display = isObsequios ? 'none'  : 'block';
-      document.getElementById('np-na').style.display        = isObsequios ? 'block' : 'none';
-
-      document.getElementById('ss-comidas-extra').style.display   = tipo === 'comidas'   ? 'block' : 'none';
-      document.getElementById('ss-obsequios-extra').style.display = tipo === 'obsequios' ? 'block' : 'none';
-      document.getElementById('ss-eventos-extra').style.display   = tipo === 'eventos'   ? 'block' : 'none';
-
-      const showTope = tipo === 'comidas' || tipo === 'obsequios';
-      document.getElementById('ss-tope-wrap').style.display = showTope ? 'block' : 'none';
-
-      if (tipo === 'comidas') {
-        const topeReal = (window.tipo === 'Nacional') ? 1500 : 2500;
-        document.getElementById('ss-tope-val').textContent = fmtSS(topeReal) + '/evento · ' + (window.tipo === 'Nacional' ? 'nacional' : 'internacional');
-        const exc = montoRep > 0 && montoRep > topeReal;
-        document.getElementById('ss-tope-chip').className = 'ss-tope-chip ' + (exc ? 'exc' : 'ok');
-        document.getElementById('ss-tope-alert').style.display = exc ? 'flex' : 'none';
-        if (exc) document.getElementById('ss-tope-alert-txt').textContent = 'Excede el tope de política (' + fmtSS(topeReal) + '). Se requiere justificación adicional.';
-      }
-
-      if (tipo === 'obsequios') {
-        document.getElementById('ss-tope-val').textContent = fmtSS(2000) + '/persona × ' + nd + ' = ' + fmtSS(topeObsequios) + ' total';
-        document.getElementById('ss-obs-info-txt').textContent = 'Límite deducible: ' + fmtSS(2000) + ' por persona/año (A.5). Para ' + nd + ' destinatario(s): máx. ' + fmtSS(topeObsequios) + '.';
-        const exc = montoRep > 0 && montoRep > topeObsequios;
-        document.getElementById('ss-tope-chip').className = 'ss-tope-chip ' + (exc ? 'exc' : 'ok');
-        document.getElementById('ss-tope-alert').style.display = exc ? 'flex' : 'none';
-        if (exc) document.getElementById('ss-tope-alert-txt').textContent = 'Excede el límite deducible (' + fmtSS(topeObsequios) + '). La diferencia no será deducible fiscalmente.';
-      }
-
-      ssApplyAuth('ss-auth-rep-wrap', 'ss-auth-rep-badge', 'ss-auth-rep-note', montoRep);
-    }
-
-    // ── CAPACITACIONES ──
-    if (isCap) {
-      ssApplyAuth('ss-auth-cap-wrap', 'ss-auth-cap-badge', 'ss-auth-cap-note', montoCap);
-    }
-  }
-
-  document.getElementById('staying-social').addEventListener('change', ssRun);
-  document.getElementById('ss-tipo').addEventListener('change', ssRun);
-  document.getElementById('ss-ndestinatarios').addEventListener('input', ssRun);
-  document.getElementById('ss-monto-eq').addEventListener('input', ssRun);
-  document.getElementById('ss-monto-rep').addEventListener('input', ssRun);
-  document.getElementById('ss-monto-cap').addEventListener('input', ssRun);
-
-  // Re-run when Nacional/Internacional changes (affects topes)
-  document.querySelectorAll('#seg-tipo button').forEach(b => b.addEventListener('click', ssRun));
-
-  // Include SS fields in form reset
-  const origReset = document.getElementById('vt-form').onreset;
-  document.getElementById('vt-form').addEventListener('reset', () => {
-    setTimeout(() => {
-      document.getElementById('ss-subsec').style.display = 'none';
-      document.getElementById('num-personas').style.display = 'block';
-      document.getElementById('np-na').style.display = 'none';
-    }, 0);
-  });
-
-})();
 </script>
 </body>
 </html>
