@@ -114,6 +114,18 @@
   .status-title { font-weight: 600; font-size: 14px; }
   .status-detail { font-size: 13px; opacity: 0.92; margin-top: 4px; line-height: 1.5; }
   .id-pill { display: inline-block; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; font-family: ui-monospace, 'SF Mono', Consolas, monospace; font-size: 12px; margin-left: 4px; }
+  /* ── Tipo de solicitud toggle ── */
+  .tipo-sol-wrap { display: flex; gap: 0; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; margin: 4px 0; }
+  .tipo-sol-btn { flex: 1; padding: 14px 10px; border: none; background: transparent; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--muted); transition: all .2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .tipo-sol-btn span.ico { font-size: 22px; }
+  .tipo-sol-btn span.lbl { font-size: 13px; }
+  .tipo-sol-btn span.sub { font-size: 11px; color: var(--muted-2); font-weight: 400; }
+  .tipo-sol-btn:first-child { border-right: 1px solid var(--border); }
+  .tipo-sol-btn.active { background: var(--navy); color: white; }
+  .tipo-sol-btn.active span.sub { color: rgba(255,255,255,.7); }
+  /* SS standalone dates */
+  .ss-fecha-row { display: grid; grid-template-columns: 1fr 1fr 0.6fr; gap: 14px; margin-bottom: 14px; }
+  .computed-days { background: var(--blue-light); color: var(--blue); border-radius: 8px; padding: 9px 12px; font-size: 14px; font-weight: 600; text-align: center; border: 1px solid #C8D9EF; }
   /* ── Staying Social subsection ── */
   .ss-subsec { background: #F3F7FD; border: 1px solid #C8D9EF; border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
   .ss-lbl { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--blue); margin: 0 0 14px; }
@@ -254,6 +266,26 @@
   </div>
 </div>
 
+<div class="card" id="card-tipo-solicitud">
+  <h2><span class="dot"></span>Tipo de solicitud <span class="en">/ Request type</span></h2>
+  <div class="card-sep"></div>
+  <div class="tipo-sol-wrap" role="radiogroup">
+    <button type="button" class="tipo-sol-btn" id="btn-viaje" onclick="setTipoSol('viaje')">
+      <span class="ico">✈️</span>
+      <span class="lbl">Viaje / Travel</span>
+      <span class="sub">Viáticos, topes y tarifa de mercado</span>
+    </button>
+    <button type="button" class="tipo-sol-btn" id="btn-ss" onclick="setTipoSol('ss')">
+      <span class="ico">🤝</span>
+      <span class="lbl">Staying Social / Event</span>
+      <span class="sub">Reunión, representación o capacitación</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── MODO VIAJE ── -->
+<div id="modo-viaje" style="display:none">
+
 <div class="card">
   <h2><span class="dot"></span>Datos del viaje <span class="en">/ Trip information</span></h2>
   <div class="card-sep"></div>
@@ -283,161 +315,10 @@
     </div>
     <div class="field">
       <label>Días del viaje <span class="en">/ Trip days</span></label>
-      <div class="readonly" id="dias">—</div>
-    </div>
-  </div>
-  <div class="grid-2" style="margin-top: 14px;">
-    <div class="field">
-      <label>Staying Social <span class="en">/ Event category</span></label>
-      <select name="staying_social" id="staying-social">
-        <option value="">— No aplica / N/A —</option>
-        <option value="equipo">Staying Social con equipo</option>
-        <option value="clientes">Representación con clientes</option>
-        <option value="partners">Representación con partners</option>
-        <option value="proveedores">Representación con proveedores</option>
-        <option value="capacitaciones">Capacitaciones</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Número de personas <span class="en">/ Number of attendees</span></label>
-      <input type="number" name="num_personas" id="num-personas" min="1" step="1" placeholder="0">
-      <div class="np-na" id="np-na" style="display:none">N/A</div>
+      <div class="computed-days" id="dias">—</div>
     </div>
   </div>
 
-  <!-- Staying Social subsection (conditional) -->
-  <div class="ss-subsec" id="ss-subsec" style="display:none">
-
-    <!-- EQUIPO -->
-    <div id="ss-eq" style="display:none">
-      <p class="ss-lbl">Reunión interna / Internal meeting</p>
-      <div class="grid-2" style="margin-bottom:12px">
-        <div class="field">
-          <label>Monto de la reunión <span class="en">/ Meeting cost (MXN)</span></label>
-          <input type="number" name="ss_monto_eq"  id="ss-monto-eq" min="0" step="0.01" placeholder="0.00">
-        </div>
-        <div></div>
-      </div>
-      <div class="field" style="margin-bottom:12px">
-        <label>Motivo de la reunión <span class="en">/ Meeting purpose</span></label>
-        <textarea name="ss_motivo_eq" id="ss-motivo-eq" placeholder="Describe el motivo o agenda de la reunión..."></textarea>
-      </div>
-      <div id="ss-auth-eq-wrap" style="display:none">
-        <div class="ss-sep"></div>
-        <div class="field">
-          <label>Autorización requerida <span class="en">/ Approval required</span></label>
-          <span id="ss-auth-eq-badge" class="ss-auth-badge ok">Líder directo</span>
-          <div id="ss-auth-eq-note" class="ss-auth-note" style="display:none">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2). / Requires <strong>prior</strong> approval before incurring the expense.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- REPRESENTACIÓN -->
-    <div id="ss-rep" style="display:none">
-      <p class="ss-lbl">Gastos de representación / Representation expenses</p>
-      <div class="field" style="margin-bottom:12px">
-        <label>Tipo de actividad <span class="en">/ Activity type</span></label>
-        <select name="ss_tipo_actividad" id="ss-tipo">
-          <option value="">— Selecciona / Select —</option>
-          <option value="comidas">Comidas y consumos en restaurante</option>
-          <option value="eventos">Eventos corporativos con clientes</option>
-          <option value="obsequios">Obsequios a clientes</option>
-        </select>
-      </div>
-      <div class="field" style="margin-bottom:10px">
-        <label>Monto estimado <span class="en">/ Estimated cost (MXN)</span></label>
-        <input type="number" name="ss_monto_rep" id="ss-monto-rep" min="0" step="0.01" placeholder="0.00">
-      </div>
-      <!-- Tope chip -->
-      <div id="ss-tope-wrap" style="display:none;margin-bottom:10px">
-        <div id="ss-tope-chip" class="ss-tope-chip ok">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-          <span id="ss-tope-val"></span>
-        </div>
-        <div id="ss-tope-alert" class="ss-warn" style="display:none">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <span id="ss-tope-alert-txt"></span>
-        </div>
-      </div>
-      <!-- COMIDAS extra -->
-      <div id="ss-comidas-extra" style="display:none">
-        <div class="field" style="margin-bottom:12px">
-          <label>Nombre del cliente o beneficiario <span class="en">/ Client name</span></label>
-          <input type="text" name="ss_nombre_cliente" placeholder="Nombre completo del cliente o beneficiario...">
-        </div>
-      </div>
-      <!-- OBSEQUIOS extra -->
-      <div id="ss-obsequios-extra" style="display:none">
-        <div class="ss-info" id="ss-obs-info">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span id="ss-obs-info-txt"></span>
-        </div>
-        <div class="field" style="margin-bottom:12px">
-          <label>Número de destinatarios del obsequio <span class="en">/ Number of recipients</span></label>
-          <input type="number" name="ss_num_destinatarios" id="ss-ndestinatarios" value="1" min="1" step="1">
-        </div>
-        <div class="field" style="margin-bottom:12px">
-          <label>Nombre del cliente, socio o institución <span class="en">/ Recipient name</span></label>
-          <input type="text" name="ss_nombre_destinatario" placeholder="Nombre completo del cliente, socio o institución...">
-        </div>
-        <div class="field" style="margin-bottom:12px">
-          <label>Objetivo del obsequio <span class="en">/ Gift objective</span></label>
-          <textarea name="ss_objetivo_obsequio" placeholder="Describe el objetivo o motivo del obsequio..."></textarea>
-        </div>
-      </div>
-      <!-- EVENTOS extra -->
-      <div id="ss-eventos-extra" style="display:none">
-        <div class="field" style="margin-bottom:12px">
-          <label>Nombre de la actividad <span class="en">/ Activity name</span></label>
-          <input type="text" name="ss_nombre_actividad" placeholder="Ej. Cena de gala, presentación de producto, visita institucional...">
-        </div>
-        <div class="field" style="margin-bottom:12px">
-          <label>Objetivo comercial del evento <span class="en">/ Commercial objective</span></label>
-          <textarea name="ss_objetivo_evento" placeholder="Describe el objetivo comercial, asistentes y propósito del evento..."></textarea>
-        </div>
-      </div>
-      <!-- Auth representación -->
-      <div id="ss-auth-rep-wrap" style="display:none">
-        <div class="ss-sep"></div>
-        <div class="field">
-          <label>Autorización requerida <span class="en">/ Approval required</span></label>
-          <span id="ss-auth-rep-badge" class="ss-auth-badge ok">Líder directo</span>
-          <div id="ss-auth-rep-note" class="ss-auth-note" style="display:none">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2). / Requires <strong>prior</strong> approval before incurring the expense.
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CAPACITACIONES -->
-    <div id="ss-cap" style="display:none">
-      <p class="ss-lbl">Costo del evento / Event cost</p>
-      <div class="field" style="margin-bottom:12px">
-        <label>Monto total del evento <span class="en">/ Total event cost (MXN)</span></label>
-        <input type="number" name="ss_monto_cap" id="ss-monto-cap" min="0" step="0.01" placeholder="0.00">
-      </div>
-      <div class="field" style="margin-bottom:12px">
-        <label>Motivo de la capacitación <span class="en">/ Training purpose</span></label>
-        <textarea name="ss_motivo_cap" id="ss-motivo-cap" placeholder="Describe el objetivo o tema de la capacitación..."></textarea>
-      </div>
-      <div id="ss-auth-cap-wrap" style="display:none">
-        <div class="ss-sep"></div>
-        <div class="field">
-          <label>Autorización requerida <span class="en">/ Approval required</span></label>
-          <span id="ss-auth-cap-badge" class="ss-auth-badge ok">Líder directo</span>
-          <div id="ss-auth-cap-note" class="ss-auth-note" style="display:none">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2). / Requires <strong>prior</strong> approval before incurring the expense.
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /ss-subsec -->
 </div>
 
 <div class="card">
@@ -539,6 +420,175 @@
     <input type="number" min="0" step="1" class="mkt-amt" data-key="capacitacion" placeholder="$0">
   </div>
 </div>
+</div><!-- /modo-viaje -->
+
+<!-- ── MODO STAYING SOCIAL STANDALONE ── -->
+<div id="modo-ss" style="display:none">
+<div class="card">
+  <h2><span class="dot"></span>Datos del evento <span class="en">/ Event details</span></h2>
+  <div class="card-sep"></div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="field">
+      <label>Staying Social <span class="en">/ Event category</span><span class="req">*</span></label>
+      <select name="ss_categoria" id="ss-cat-sa" onchange="ssRunSA()">
+        <option value="">— Selecciona / Select —</option>
+        <option value="equipo">Staying Social con equipo</option>
+        <option value="clientes">Representación con clientes</option>
+        <option value="partners">Representación con partners</option>
+        <option value="proveedores">Representación con proveedores</option>
+        <option value="capacitaciones">Capacitaciones</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Número de personas <span class="en">/ Number of attendees</span><span class="req">*</span></label>
+      <input type="number" name="ss_num_personas" id="ss-np-sa" min="1" step="1" placeholder="0" oninput="ssRunSA()">
+      <div class="np-na" id="ss-np-na-sa" style="display:none">N/A</div>
+    </div>
+  </div>
+
+  <div class="ss-fecha-row">
+    <div class="field">
+      <label>Fecha del evento <span class="en">/ Event date</span><span class="req">*</span></label>
+      <input type="date" name="ss_fecha_inicio" id="ss-fecha-ini" onchange="calcDiasEvento()">
+    </div>
+    <div class="field">
+      <label>Fecha fin <span class="en">/ End date</span></label>
+      <input type="date" name="ss_fecha_fin" id="ss-fecha-fin" onchange="calcDiasEvento()">
+    </div>
+    <div class="field">
+      <label>Días <span class="en">/ Days</span></label>
+      <div class="computed-days" id="ss-dias-evento">—</div>
+    </div>
+  </div>
+
+  <!-- SS subsection standalone -->
+  <div class="ss-subsec" id="ss-subsec-sa" style="display:none">
+
+    <!-- EQUIPO SA -->
+    <div id="ss-eq-sa" style="display:none">
+      <p class="ss-lbl">Reunión interna / Internal meeting</p>
+      <div class="field" style="margin-bottom:12px">
+        <label>Monto de la reunión <span class="en">/ Meeting cost (MXN)</span></label>
+        <input type="number" name="ss_monto_eq" id="ss-monto-eq-sa" min="0" step="0.01" placeholder="0.00" oninput="ssRunSA()">
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Motivo de la reunión <span class="en">/ Meeting purpose</span></label>
+        <textarea name="ss_motivo_eq" placeholder="Describe el motivo o agenda de la reunión..."></textarea>
+      </div>
+      <div id="ss-auth-eq-sa-wrap" style="display:none">
+        <div class="ss-sep"></div>
+        <div class="field">
+          <label>Autorización requerida <span class="en">/ Approval required</span></label>
+          <span id="ss-auth-eq-sa-badge" class="ss-auth-badge ok"><span id="ss-auth-eq-sa-txt">Líder directo</span></span>
+          <div id="ss-auth-eq-sa-note" class="ss-auth-note" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2).
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPRESENTACIÓN SA -->
+    <div id="ss-rep-sa" style="display:none">
+      <p class="ss-lbl">Gastos de representación / Representation expenses</p>
+      <div class="field" style="margin-bottom:12px">
+        <label>Tipo de actividad <span class="en">/ Activity type</span></label>
+        <select name="ss_tipo_actividad" id="ss-tipo-sa" onchange="ssRunSA()">
+          <option value="">— Selecciona / Select —</option>
+          <option value="comidas">Comidas y consumos en restaurante</option>
+          <option value="eventos">Eventos corporativos con clientes</option>
+          <option value="obsequios">Obsequios a clientes</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Monto estimado <span class="en">/ Estimated cost (MXN)</span></label>
+        <input type="number" name="ss_monto_rep" id="ss-monto-rep-sa" min="0" step="0.01" placeholder="0.00" oninput="ssRunSA()">
+      </div>
+      <div id="ss-tope-wrap-sa" style="display:none;margin-bottom:10px">
+        <div id="ss-tope-chip-sa" class="ss-tope-chip ok">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <span id="ss-tope-val-sa"></span>
+        </div>
+        <div id="ss-tope-alert-sa" class="ss-warn" style="display:none">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span id="ss-tope-alert-txt-sa"></span>
+        </div>
+      </div>
+      <div id="ss-comidas-extra-sa" style="display:none">
+        <div class="field" style="margin-bottom:12px">
+          <label>Nombre del cliente o beneficiario <span class="en">/ Client name</span></label>
+          <input type="text" name="ss_nombre_cliente" placeholder="Nombre completo...">
+        </div>
+      </div>
+      <div id="ss-obsequios-extra-sa" style="display:none">
+        <div class="ss-info" id="ss-obs-info-sa" style="margin-bottom:10px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="ss-obs-info-txt-sa"></span>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Número de destinatarios <span class="en">/ Number of recipients</span></label>
+          <input type="number" name="ss_num_destinatarios" id="ss-ndestinatarios-sa" value="1" min="1" step="1" oninput="ssRunSA()">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Nombre del cliente, socio o institución <span class="en">/ Recipient name</span></label>
+          <input type="text" name="ss_nombre_destinatario" placeholder="Nombre completo...">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Objetivo del obsequio <span class="en">/ Gift objective</span></label>
+          <textarea name="ss_objetivo_obsequio" placeholder="Describe el objetivo o motivo del obsequio..."></textarea>
+        </div>
+      </div>
+      <div id="ss-eventos-extra-sa" style="display:none">
+        <div class="field" style="margin-bottom:12px">
+          <label>Nombre de la actividad <span class="en">/ Activity name</span></label>
+          <input type="text" name="ss_nombre_actividad" placeholder="Ej. Cena de gala, presentación de producto...">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Objetivo comercial <span class="en">/ Commercial objective</span></label>
+          <textarea name="ss_objetivo_evento" placeholder="Describe el objetivo comercial y propósito del evento..."></textarea>
+        </div>
+      </div>
+      <div id="ss-auth-rep-sa-wrap" style="display:none">
+        <div class="ss-sep"></div>
+        <div class="field">
+          <label>Autorización requerida <span class="en">/ Approval required</span></label>
+          <span id="ss-auth-rep-sa-badge" class="ss-auth-badge ok"><span id="ss-auth-rep-sa-txt">Líder directo</span></span>
+          <div id="ss-auth-rep-sa-note" class="ss-auth-note" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2).
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPACITACIONES SA -->
+    <div id="ss-cap-sa" style="display:none">
+      <p class="ss-lbl">Costo del evento / Event cost</p>
+      <div class="field" style="margin-bottom:12px">
+        <label>Monto total del evento <span class="en">/ Total event cost (MXN)</span></label>
+        <input type="number" name="ss_monto_cap" id="ss-monto-cap-sa" min="0" step="0.01" placeholder="0.00" oninput="ssRunSA()">
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Motivo de la capacitación <span class="en">/ Training purpose</span></label>
+        <textarea name="ss_motivo_cap" placeholder="Describe el objetivo o tema de la capacitación..."></textarea>
+      </div>
+      <div id="ss-auth-cap-sa-wrap" style="display:none">
+        <div class="ss-sep"></div>
+        <div class="field">
+          <label>Autorización requerida <span class="en">/ Approval required</span></label>
+          <span id="ss-auth-cap-sa-badge" class="ss-auth-badge ok"><span id="ss-auth-cap-sa-txt">Líder directo</span></span>
+          <div id="ss-auth-cap-sa-note" class="ss-auth-note" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2).
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /ss-subsec-sa -->
+</div>
+</div><!-- /modo-ss -->
 
 <div class="footer-note">
   <strong>Importante / Important.</strong>
