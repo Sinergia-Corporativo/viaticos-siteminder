@@ -1,46 +1,839 @@
-# Solicitud de viáticos · SiteMinder México
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solicitud de viáticos / Travel expense request · SiteMinder México</title>
+<style>
+  :root {
+    --navy: #003F87;
+    --navy-dark: #002B5C;
+    --blue: #0066CC;
+    --blue-light: #E8F1FB;
+    --bg: #F5F7FA;
+    --card: #FFFFFF;
+    --border: #E5EAF0;
+    --border-strong: #CED5DE;
+    --text: #1A2332;
+    --muted: #6B7280;
+    --muted-2: #9CA3AF;
+    --success: #065F46;
+    --success-bg: #D1FAE5;
+    --danger: #991B1B;
+    --danger-bg: #FEE2E2;
+    --danger-border: #DC2626;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .container { max-width: 820px; margin: 0 auto; padding: 32px 20px 80px; }
+  .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  .brand-logo { max-height: 40px; width: auto; display: block; }
+  .brand-eyebrow { font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .brand-co { font-size: 14px; font-weight: 600; margin-top: 2px; color: var(--text); }
+  h1 { font-size: 26px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.5px; line-height: 1.25; }
+  .brand-h1 { font-size: 21px; font-weight: 700; margin: 4px 0 0; line-height: 1.25; color: var(--text); letter-spacing: -0.3px; }
+  .h1-en { font-size: 17px; font-weight: 500; color: var(--muted); display: block; margin-top: 2px; letter-spacing: -0.2px; }
+  .subtitle { font-size: 11px; color: var(--muted); margin: 12px 0 26px; line-height: 1.65; }
+  .subtitle .en { display: block; font-style: italic; opacity: 0.8; margin-top: 6px; }
+  .total-card {
+    background: var(--navy);
+    color: white;
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+  .total-label { font-size: 11px; opacity: 0.75; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 6px; font-weight: 500; }
+  .total-amount { font-size: 32px; font-weight: 600; margin: 0; letter-spacing: -1px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .total-side { text-align: right; font-size: 12px; opacity: 0.88; line-height: 1.7; font-variant-numeric: tabular-nums; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 18px; }
+  .card h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; display: flex; align-items: center; gap: 9px; }
+  .card h2 .dot { width: 6px; height: 6px; background: var(--blue); border-radius: 50%; }
+  .card h2 .en { color: var(--muted); font-weight: 400; }
+  .card-sep { height: 1px; background: transparent; margin: 0 0 18px; }
+  .hint { font-size: 13px; color: var(--muted); margin: 0 0 14px; line-height: 1.5; }
+  .hint .en { display: block; font-style: italic; opacity: 0.9; margin-top: 2px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; color: var(--muted); font-weight: 500; line-height: 1.4; }
+  .field label .req { color: var(--danger-border); margin-left: 1px; }
+  .field label .en { font-weight: 400; opacity: 0.85; }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+    font: inherit; font-size: 14px; background: white; color: var(--text);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.12);
+  }
+  .field input:invalid:not(:focus):not(:placeholder-shown) { border-color: var(--danger-border); }
+  .readonly { padding: 10px 12px; background: #F3F5F8; border-radius: 8px; font-size: 14px; color: var(--muted); border: 1px solid var(--border); min-height: 40px; display: flex; align-items: center; }
+  .seg { display: inline-flex; background: #F3F5F8; padding: 3px; border-radius: 8px; margin-bottom: 14px; }
+  .seg button { padding: 7px 16px; font-size: 13px; border: none; background: transparent; border-radius: 6px; cursor: pointer; color: var(--muted); font-weight: 500; transition: all 0.15s; }
+  .seg button.active { background: white; color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .row { display: grid; align-items: center; gap: 14px; padding: 13px 0; border-bottom: 1px solid #F1F3F7; }
+  .row-tope { grid-template-columns: minmax(0,1fr) 110px 75px 100px; }
+  .row-mkt { grid-template-columns: minmax(0,1fr) 140px; }
+  .row:last-child { border-bottom: none; padding-bottom: 4px; }
+  .row:first-of-type { padding-top: 4px; }
+  .cn-name { font-size: 14px; line-height: 1.35; font-weight: 500; }
+  .cn-name .en { display: block; font-weight: 400; color: var(--muted); font-size: 12px; margin-top: 1px; }
+  .cn-sub { font-size: 12px; color: var(--muted); margin-top: 4px; font-weight: 400; line-height: 1.4; }
+  .cn-sub .en { display: block; font-style: italic; opacity: 0.9; }
+  .cn-tope { font-size: 13px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; line-height: 1.4; }
+  .cn-tope .u { font-size: 11px; display: block; color: var(--muted-2); }
+  .qty, .mkt-amt { width: 100%; text-align: right; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+  .cn-amt { text-align: right; font-size: 16px; font-weight: 600; color: var(--blue); font-variant-numeric: tabular-nums; }
+  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
+  .btn { padding: 12px 28px; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--navy); color: white; border: none; border-radius: 8px; transition: background 0.15s; }
+  .btn:hover:not(:disabled) { background: var(--navy-dark); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-secondary { padding: 12px 22px; font-size: 14px; cursor: pointer; background: white; color: var(--text); border: 1px solid var(--border-strong); border-radius: 8px; font-weight: 500; }
+  .btn-secondary:hover { background: #F3F5F8; }
+  .footer-note { font-size: 12px; color: var(--muted); line-height: 1.7; margin: 22px 0 0; padding: 14px 18px; background: var(--blue-light); border-radius: 8px; border-left: 3px solid var(--blue); }
+  .footer-note strong { color: var(--navy); font-weight: 600; }
+  .footer-note .en { display: block; font-style: italic; margin-top: 6px; opacity: 0.9; }
+  .status { padding: 14px 18px; border-radius: 8px; margin-top: 18px; display: none; align-items: flex-start; gap: 12px; }
+  .status.show { display: flex; }
+  .status.success { background: var(--success-bg); color: var(--success); }
+  .status.error { background: var(--danger-bg); color: var(--danger); }
+  .status-icon { flex-shrink: 0; width: 20px; height: 20px; margin-top: 1px; }
+  .status-title { font-weight: 600; font-size: 14px; }
+  .status-detail { font-size: 13px; opacity: 0.92; margin-top: 4px; line-height: 1.5; }
+  .id-pill { display: inline-block; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; font-family: ui-monospace, 'SF Mono', Consolas, monospace; font-size: 12px; margin-left: 4px; }
+  /* ── Staying Social subsection ── */
+  .ss-subsec { background: #F3F7FD; border: 1px solid #C8D9EF; border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
+  .ss-lbl { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--blue); margin: 0 0 14px; }
+  .ss-subsec .field label { color: var(--muted); }
+  .ss-subsec textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font: inherit; font-size: 14px; background: white; color: var(--text); min-height: 70px; resize: vertical; transition: border-color .15s, box-shadow .15s; }
+  .ss-subsec textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,102,204,.12); }
+  .ss-sep { height: 1px; background: #D6E4F5; margin: 14px 0; }
+  .ss-tope-chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 7px; font-size: 13px; font-weight: 500; margin-top: 6px; }
+  .ss-tope-chip.ok { background: var(--blue-light); color: var(--blue); }
+  .ss-tope-chip.exc { background: #FEF3C7; color: #92400E; }
+  .ss-warn { font-size: 12px; color: #92400E; background: #FEF3C7; border-radius: 7px; padding: 7px 10px; margin-top: 7px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+  .ss-info { font-size: 12px; color: #065F46; background: #D1FAE5; border-radius: 7px; padding: 7px 10px; margin-top: 0; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+  .ss-auth-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 5px 11px; border-radius: 7px; font-weight: 500; flex-wrap: wrap; line-height: 1.4; }
+  .ss-auth-badge.ok { background: var(--success-bg); color: var(--success); }
+  .ss-auth-badge.warn { background: #FEF3C7; color: #92400E; }
+  .ss-auth-badge.danger { background: var(--danger-bg); color: var(--danger); }
+  .ss-auth-note { font-size: 12px; color: var(--danger); background: var(--danger-bg); border-radius: 7px; padding: 7px 10px; margin-top: 8px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+  .np-na { padding: 10px 12px; background: #F3F5F8; border-radius: 8px; font-size: 14px; color: var(--muted-2); border: 1px solid var(--border); font-style: italic; }
+  @media (max-width: 640px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .total-card { flex-direction: column; align-items: flex-start; }
+    .total-side { text-align: left; }
+    .total-amount { font-size: 28px; }
+    .row-tope { grid-template-columns: 1fr 1fr; row-gap: 6px; column-gap: 10px; padding: 14px 0; }
+    .row-tope > div.cn-block { grid-column: 1 / -1; }
+    .row-tope .cn-tope { grid-column: 1 / -1; text-align: left; font-size: 11px; }
+    .row-tope .cn-tope .u { display: inline; margin-left: 6px; }
+    .row-tope .qty { grid-column: 1; }
+    .row-tope .cn-amt { grid-column: 2; }
+    .container { padding: 20px 14px 50px; }
+    .actions { flex-direction: column-reverse; }
+    .btn, .btn-secondary { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
 
-Formulario web para que los colaboradores de SiteMinder México soliciten viáticos. El monto se calcula automáticamente conforme al Anexo B de la política y se dispersa en la tarjeta Minu del colaborador.
+<div class="brand">
+  <img src="logo-siteminder.png" alt="SiteMinder" class="brand-logo" onerror="this.style.display='none'">
+  <div>
+    <div class="brand-eyebrow">SiteMinder México · Sinergia Corporativo</div>
+    <h1 class="brand-h1">Travel expense request</h1>
+  </div>
+</div>
 
-Administrado por **Sinergia Corporativo**.
+<p class="subtitle">
+  Llena la información de tu viaje. El monto se calcula automáticamente conforme al Anexo B y se dispersa en tu tarjeta Minu.
+  <span class="en">Fill in your travel information. The amount is calculated automatically per Annex B and disbursed to your Minu card.</span>
+</p>
 
-## Arquitectura
+<div class="total-card">
+  <div>
+    <p class="total-label">Total a dispersar en tarjeta Minu / Total to disburse on Minu card</p>
+    <p class="total-amount" id="grand">$0</p>
+  </div>
+  <div class="total-side">
+    Con tope / Capped · <span id="sub-tope">$0</span><br>
+    Tarifa mercado / Market rate · <span id="sub-mkt">$0</span>
+  </div>
+</div>
 
-```
-Colaborador  →  index.html (GitHub Pages)
-                    ↓ POST JSON
-                Google Apps Script (Sinergia)
-                    ├── Calcula monto conforme a Anexo B
-                    ├── Guarda en Google Sheet (control)
-                    ├── Notifica por correo (Líder, Finanzas, Sinergia)
-                    └── Envía acuse al colaborador
-```
+<form id="vt-form" autocomplete="off" novalidate>
 
-## Configuración
+<div class="card">
+  <h2><span class="dot"></span>Datos del colaborador <span class="en">/ Employee information</span></h2>
+  <div class="card-sep"></div>
+  <div class="grid-2">
+    <div class="field">
+      <label>Nombre completo <span class="en">/ Full name</span><span class="req">*</span></label>
+      <input type="text" name="colaborador" required placeholder="Nombre y apellido / First and last name">
+    </div>
+    <div class="field">
+      <label>Correo del colaborador <span class="en">/ Employee email</span><span class="req">*</span></label>
+      <input type="email" name="colaborador_email" required placeholder="nombre@siteminder.com">
+    </div>
+    <div class="field">
+      <label>Puesto <span class="en">/ Job title</span><span class="req">*</span></label>
+      <select name="puesto" required>
+        <option value="">— Selecciona tu puesto / Select your role —</option>
+        <option>Business Development Executive</option>
+        <option>Business Development Manager</option>
+        <option>Customer Onboarding Manager</option>
+        <option>Customer Onboarding Operations Coordinator</option>
+        <option>Customer Onboarding Specialist</option>
+        <option>Customer Operations Specialist</option>
+        <option>Customer Solutions Consultant</option>
+        <option>Customer Success Advisor</option>
+        <option>Customer Success Manager</option>
+        <option>GDS Optimisation Manager</option>
+        <option>General Services Manager</option>
+        <option>HR &amp; Operations Director</option>
+        <option>Market Performance Operations Director</option>
+        <option>Market Performance Specialist</option>
+        <option>Market Performance Team Lead</option>
+        <option>Partner Manager, Ecosystem Partnerships</option>
+        <option>Regional Sales Director</option>
+        <option>Regional Sales Manager</option>
+        <option>Revenue Growth Consultant</option>
+        <option>Revenue Growth Manager</option>
+        <option>Sales Enablement Manager</option>
+        <option>Sales Executive</option>
+        <option>Sales Trainer</option>
+        <option>Senior Accounting Analyst</option>
+        <option>Senior Revenue Growth Consultant</option>
+        <option>Senior Sales Executive</option>
+        <option>Senior Specialist, Finance and Accounting</option>
+        <option>Strategic Account Manager</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Equipo <span class="en">/ Team</span><span class="req">*</span></label>
+      <select name="area" required>
+        <option value="">— Selecciona tu equipo / Select your team —</option>
+        <option>CS Mgt</option>
+        <option>Customer Retention</option>
+        <option>GDS</option>
+        <option>General Services</option>
+        <option>GS Mgt</option>
+        <option>HR</option>
+        <option>L&amp;D</option>
+        <option>Market Performance</option>
+        <option>Onboarding &amp; Success Operations</option>
+        <option>Onboarding Success</option>
+        <option>OS Mgt</option>
+        <option>Partnerships</option>
+        <option>Quota Carrying Sales</option>
+        <option>Revenue Operations</option>
+        <option>Sales Management</option>
+        <option>Transaction Sales</option>
+        <option>Transactional Finance</option>
+      </select>
+    </div>
+    <div class="field" style="grid-column: 1 / -1;">
+      <label>Correo del líder directo <span class="en">/ Direct manager's email</span><span class="req">*</span></label>
+      <input type="email" name="lider_email" required placeholder="lider@siteminder.com">
+    </div>
+  </div>
+</div>
 
-Antes de publicar, hay que llenar dos parámetros:
+<div class="card">
+  <h2><span class="dot"></span>Datos del viaje <span class="en">/ Trip information</span></h2>
+  <div class="card-sep"></div>
+  <div class="seg" id="seg-tipo" role="radiogroup" aria-label="Tipo de viaje / Trip type">
+    <button type="button" class="active" data-tipo="Nacional">Nacional / Domestic</button>
+    <button type="button" data-tipo="Internacional">Internacional / International</button>
+  </div>
+  <input type="hidden" name="tipo_viaje" value="Nacional">
+  <div class="grid-2" style="margin-bottom: 12px;">
+    <div class="field">
+      <label>Destino <span class="en">/ Destination</span><span class="req">*</span></label>
+      <input type="text" name="destino" required placeholder="Ciudad / país · City / country">
+    </div>
+    <div class="field">
+      <label>Motivo del viaje <span class="en">/ Business reason</span><span class="req">*</span></label>
+      <input type="text" name="motivo" required placeholder="¿Para qué viajas? / Purpose of the trip">
+    </div>
+  </div>
+  <div class="grid-3">
+    <div class="field">
+      <label>Fecha de salida <span class="en">/ Departure date</span><span class="req">*</span></label>
+      <input type="date" name="fecha_salida" id="salida" required>
+    </div>
+    <div class="field">
+      <label>Fecha de regreso <span class="en">/ Return date</span><span class="req">*</span></label>
+      <input type="date" name="fecha_regreso" id="regreso" required>
+    </div>
+    <div class="field">
+      <label>Días del viaje <span class="en">/ Trip days</span></label>
+      <div class="readonly" id="dias">—</div>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-top: 14px;">
+    <div class="field">
+      <label>Staying Social <span class="en">/ Event category</span></label>
+      <select name="staying_social" id="staying-social">
+        <option value="">— No aplica / N/A —</option>
+        <option value="equipo">Staying Social con equipo</option>
+        <option value="clientes">Representación con clientes</option>
+        <option value="partners">Representación con partners</option>
+        <option value="proveedores">Representación con proveedores</option>
+        <option value="capacitaciones">Capacitaciones</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Número de personas <span class="en">/ Number of attendees</span></label>
+      <input type="number" name="num_personas" id="num-personas" min="1" step="1" placeholder="0">
+      <div class="np-na" id="np-na" style="display:none">N/A</div>
+    </div>
+  </div>
 
-1. En `index.html`, reemplazar `APPS_SCRIPT_URL` por la URL de la aplicación web publicada en Apps Script.
-2. En la Apps Script (`Calculadora_Viaticos_Siteminder_v5.gs`), reemplazar `SHEET_ID`, `FINANZAS_EMAIL` y `SINERGIA_EMAIL` por los valores reales.
+  <!-- Staying Social subsection (conditional) -->
+  <div class="ss-subsec" id="ss-subsec" style="display:none">
 
-## Deploy
+    <!-- EQUIPO -->
+    <div id="ss-eq" style="display:none">
+      <p class="ss-lbl">Reunión interna / Internal meeting</p>
+      <div class="grid-2" style="margin-bottom:12px">
+        <div class="field">
+          <label>Monto de la reunión <span class="en">/ Meeting cost (MXN)</span></label>
+          <input type="number" name="ss_monto_eq"  id="ss-monto-eq" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div></div>
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Motivo de la reunión <span class="en">/ Meeting purpose</span></label>
+        <textarea name="ss_motivo_eq" id="ss-motivo-eq" placeholder="Describe el motivo o agenda de la reunión..."></textarea>
+      </div>
+      <div id="ss-auth-eq-wrap" style="display:none">
+        <div class="ss-sep"></div>
+        <div class="field">
+          <label>Autorización requerida <span class="en">/ Approval required</span></label>
+          <span id="ss-auth-eq-badge" class="ss-auth-badge ok">Líder directo</span>
+          <div id="ss-auth-eq-note" class="ss-auth-note" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2). / Requires <strong>prior</strong> approval before incurring the expense.
+          </div>
+        </div>
+      </div>
+    </div>
 
-1. Subir el repo a GitHub y activar GitHub Pages desde la rama `main`.
-2. La URL pública queda como `https://<usuario>.github.io/<repo>/`.
-3. URLs personalizadas con prefill por query params: `?colaborador=Nombre&puesto=Cargo&area=Área&lider_email=lider@siteminder.com`.
+    <!-- REPRESENTACIÓN -->
+    <div id="ss-rep" style="display:none">
+      <p class="ss-lbl">Gastos de representación / Representation expenses</p>
+      <div class="field" style="margin-bottom:12px">
+        <label>Tipo de actividad <span class="en">/ Activity type</span></label>
+        <select name="ss_tipo_actividad" id="ss-tipo">
+          <option value="">— Selecciona / Select —</option>
+          <option value="comidas">Comidas y consumos en restaurante</option>
+          <option value="eventos">Eventos corporativos con clientes</option>
+          <option value="obsequios">Obsequios a clientes</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Monto estimado <span class="en">/ Estimated cost (MXN)</span></label>
+        <input type="number" name="ss_monto_rep" id="ss-monto-rep" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <!-- Tope chip -->
+      <div id="ss-tope-wrap" style="display:none;margin-bottom:10px">
+        <div id="ss-tope-chip" class="ss-tope-chip ok">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <span id="ss-tope-val"></span>
+        </div>
+        <div id="ss-tope-alert" class="ss-warn" style="display:none">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span id="ss-tope-alert-txt"></span>
+        </div>
+      </div>
+      <!-- COMIDAS extra -->
+      <div id="ss-comidas-extra" style="display:none">
+        <div class="field" style="margin-bottom:12px">
+          <label>Nombre del cliente o beneficiario <span class="en">/ Client name</span></label>
+          <input type="text" name="ss_nombre_cliente" placeholder="Nombre completo del cliente o beneficiario...">
+        </div>
+      </div>
+      <!-- OBSEQUIOS extra -->
+      <div id="ss-obsequios-extra" style="display:none">
+        <div class="ss-info" id="ss-obs-info">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="ss-obs-info-txt"></span>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Número de destinatarios del obsequio <span class="en">/ Number of recipients</span></label>
+          <input type="number" name="ss_num_destinatarios" id="ss-ndestinatarios" value="1" min="1" step="1">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Nombre del cliente, socio o institución <span class="en">/ Recipient name</span></label>
+          <input type="text" name="ss_nombre_destinatario" placeholder="Nombre completo del cliente, socio o institución...">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Objetivo del obsequio <span class="en">/ Gift objective</span></label>
+          <textarea name="ss_objetivo_obsequio" placeholder="Describe el objetivo o motivo del obsequio..."></textarea>
+        </div>
+      </div>
+      <!-- EVENTOS extra -->
+      <div id="ss-eventos-extra" style="display:none">
+        <div class="field" style="margin-bottom:12px">
+          <label>Nombre de la actividad <span class="en">/ Activity name</span></label>
+          <input type="text" name="ss_nombre_actividad" placeholder="Ej. Cena de gala, presentación de producto, visita institucional...">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Objetivo comercial del evento <span class="en">/ Commercial objective</span></label>
+          <textarea name="ss_objetivo_evento" placeholder="Describe el objetivo comercial, asistentes y propósito del evento..."></textarea>
+        </div>
+      </div>
+      <!-- Auth representación -->
+      <div id="ss-auth-rep-wrap" style="display:none">
+        <div class="ss-sep"></div>
+        <div class="field">
+          <label>Autorización requerida <span class="en">/ Approval required</span></label>
+          <span id="ss-auth-rep-badge" class="ss-auth-badge ok">Líder directo</span>
+          <div id="ss-auth-rep-note" class="ss-auth-note" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2). / Requires <strong>prior</strong> approval before incurring the expense.
+          </div>
+        </div>
+      </div>
+    </div>
 
-## Anexo B (topes vigentes)
+    <!-- CAPACITACIONES -->
+    <div id="ss-cap" style="display:none">
+      <p class="ss-lbl">Costo del evento / Event cost</p>
+      <div class="field" style="margin-bottom:12px">
+        <label>Monto total del evento <span class="en">/ Total event cost (MXN)</span></label>
+        <input type="number" name="ss_monto_cap" id="ss-monto-cap" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Motivo de la capacitación <span class="en">/ Training purpose</span></label>
+        <textarea name="ss_motivo_cap" id="ss-motivo-cap" placeholder="Describe el objetivo o tema de la capacitación..."></textarea>
+      </div>
+      <div id="ss-auth-cap-wrap" style="display:none">
+        <div class="ss-sep"></div>
+        <div class="field">
+          <label>Autorización requerida <span class="en">/ Approval required</span></label>
+          <span id="ss-auth-cap-badge" class="ss-auth-badge ok">Líder directo</span>
+          <div id="ss-auth-cap-note" class="ss-auth-note" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2). / Requires <strong>prior</strong> approval before incurring the expense.
+          </div>
+        </div>
+      </div>
+    </div>
 
-| Concepto | Nacional | Internacional |
-|---|---|---|
-| Alimentación (diaria, libre distribución entre 3 comidas) | $750 | $1,500 |
-| Hospedaje (por noche) | $3,000 | $3,850 |
-| Transporte local (por trayecto) | $500 | $500 |
-| Renta de auto (por día, máx. 7) | $850 | $850 |
-| Comunicaciones (por día) | No aplica | $500 |
+  </div><!-- /ss-subsec -->
+</div>
 
-Conceptos abiertos (tarifa de mercado, sujetos a comprobación): transporte aéreo / tren / autobús, combustible, peajes y casetas, capacitación.
+<div class="card">
+  <h2><span class="dot"></span>Conceptos con tope <span class="en">/ Capped concepts</span></h2>
+  <div class="card-sep"></div>
+  <p class="hint">
+    Captura la cantidad. El monto se calcula automáticamente conforme al Anexo B. Los topes cambian según el tipo de viaje.
+    <span class="en">Enter the quantity. The amount is calculated automatically per Annex B. Caps change depending on trip type.</span>
+  </p>
 
-## Soporte
+  <div class="row row-tope">
+    <div class="cn-block">
+      <div class="cn-name">Alimentación <span class="en">/ Meals</span></div>
+      <div class="cn-sub">3 comidas/día, distribución libre <span class="en">/ 3 meals/day, flexible allocation</span></div>
+    </div>
+    <div class="cn-tope"><span id="tope-alimentacion">$750</span><span class="u">por día / per day</span></div>
+    <input type="number" min="0" step="1" class="qty" data-key="alimentacion" placeholder="0">
+    <div class="cn-amt" id="m-alimentacion">$0</div>
+  </div>
 
-Para dudas, ajustes o reportes: Sinergia Corporativo.
+  <div class="row row-tope">
+    <div class="cn-block">
+      <div class="cn-name">Hospedaje <span class="en">/ Lodging</span></div>
+      <div class="cn-sub">Reserva por NAVAN (prepago) <span class="en">/ Book via NAVAN (prepaid)</span></div>
+    </div>
+    <div class="cn-tope"><span id="tope-hospedaje">$3,000</span><span class="u">por noche / per night</span></div>
+    <input type="number" min="0" step="1" class="qty" data-key="hospedaje" placeholder="0">
+    <div class="cn-amt" id="m-hospedaje">$0</div>
+  </div>
+
+  <div class="row row-tope">
+    <div class="cn-block">
+      <div class="cn-name">Transporte local (Uber / taxi) <span class="en">/ Local transport</span></div>
+      <div class="cn-sub">Recibo digital o CFDI. No DiDi <span class="en">/ Digital receipt or tax invoice. No DiDi</span></div>
+    </div>
+    <div class="cn-tope"><span id="tope-transporte_local">$500</span><span class="u">por trayecto / per trip</span></div>
+    <input type="number" min="0" step="1" class="qty" data-key="transporte_local" placeholder="0">
+    <div class="cn-amt" id="m-transporte_local">$0</div>
+  </div>
+
+  <div class="row row-tope">
+    <div class="cn-block">
+      <div class="cn-name">Renta de automóvil <span class="en">/ Car rental</span></div>
+      <div class="cn-sub">Máximo 7 días · aprobación de Finanzas <span class="en">/ Max. 7 days · Finance approval</span></div>
+    </div>
+    <div class="cn-tope"><span id="tope-renta_auto">$850</span><span class="u">por día / per day (max. 7)</span></div>
+    <input type="number" min="0" step="1" class="qty" data-key="renta_auto" placeholder="0">
+    <div class="cn-amt" id="m-renta_auto">$0</div>
+  </div>
+
+  <div class="row row-tope">
+    <div class="cn-block">
+      <div class="cn-name">Comunicaciones <span class="en">/ Communications</span></div>
+      <div class="cn-sub">Roaming / datos / WiFi · solo internacional <span class="en">/ Roaming / data / WiFi · international only</span></div>
+    </div>
+    <div class="cn-tope"><span id="tope-comunicaciones">$0</span><span class="u">por día / per day</span></div>
+    <input type="number" min="0" step="1" class="qty" data-key="comunicaciones" placeholder="0">
+    <div class="cn-amt" id="m-comunicaciones">$0</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2><span class="dot"></span>Conceptos de tarifa de mercado <span class="en">/ Market-rate concepts</span></h2>
+  <div class="card-sep"></div>
+  <p class="hint">
+    Captura el monto estimado en pesos. Sujeto a validación de Finanzas y a comprobación con CFDI.
+    <span class="en">Enter the estimated amount in MXN. Subject to Finance approval and tax-receipt validation.</span>
+  </p>
+
+  <div class="row row-mkt">
+    <div>
+      <div class="cn-name">Transporte aéreo / tren / autobús <span class="en">/ Air, train or bus</span></div>
+      <div class="cn-sub">Clase económica · por NAVAN <span class="en">/ Economy class · via NAVAN</span></div>
+    </div>
+    <input type="number" min="0" step="1" class="mkt-amt" data-key="aereo" placeholder="$0">
+  </div>
+
+  <div class="row row-mkt">
+    <div>
+      <div class="cn-name">Combustible <span class="en">/ Fuel</span></div>
+      <div class="cn-sub">Monto real con comprobante <span class="en">/ Actual amount with receipt</span></div>
+    </div>
+    <input type="number" min="0" step="1" class="mkt-amt" data-key="combustible" placeholder="$0">
+  </div>
+
+  <div class="row row-mkt">
+    <div>
+      <div class="cn-name">Peajes y casetas <span class="en">/ Tolls</span></div>
+      <div class="cn-sub">CFDI a nombre de SiteMinder <span class="en">/ Tax receipt to SiteMinder</span></div>
+    </div>
+    <input type="number" min="0" step="1" class="mkt-amt" data-key="casetas" placeholder="$0">
+  </div>
+
+  <div class="row row-mkt">
+    <div>
+      <div class="cn-name">Cuotas de capacitación / congresos <span class="en">/ Training or conference fees</span></div>
+      <div class="cn-sub">CFDI / factura local <span class="en">/ Tax receipt / local invoice</span></div>
+    </div>
+    <input type="number" min="0" step="1" class="mkt-amt" data-key="capacitacion" placeholder="$0">
+  </div>
+</div>
+
+<div class="footer-note">
+  <strong>Importante / Important.</strong>
+  Este formato debe enviarse con al menos dos semanas de anticipación, salvo viajes de emergencia (sección 10.1 de la política). El monto aprobado se dispersa en tu tarjeta Minu. La tarjeta es medio de pago; no sustituye la comprobación con CFDI conforme a la sección 7.
+  <span class="en">Submit this form at least two weeks before your trip, except for emergency travel (policy section 10.1). The approved amount is disbursed to your Minu card. The card is a payment method; it does not replace tax-receipt (CFDI) substantiation per section 7.</span>
+</div>
+
+<div class="status" id="status" role="alert" aria-live="polite"></div>
+
+<div class="actions">
+  <button type="reset" class="btn-secondary">Limpiar / Clear</button>
+  <button type="submit" class="btn" id="btn-submit">Enviar solicitud / Submit request</button>
+</div>
+
+</form>
+
+</div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydr2FW8bEV3FRiOC2mTsaRlkF9opF-9_KvRD6qUE222GOWsJ62pWvOpKhR8N6raag5/exec';
+
+const TOPES = {
+  alimentacion:     { n: 750,  i: 1500, max: null },
+  hospedaje:        { n: 3000, i: 3850, max: null },
+  transporte_local: { n: 500,  i: 500,  max: null },
+  renta_auto:       { n: 850,  i: 850,  max: 7 },
+  comunicaciones:   { n: 0,    i: 500,  max: null }
+};
+const KEY_MAP_TOPE = {
+  alimentacion: 'dias_alimentacion',
+  hospedaje: 'noches_hospedaje',
+  transporte_local: 'trayectos_transporte_local',
+  renta_auto: 'dias_renta_auto',
+  comunicaciones: 'dias_comunicaciones'
+};
+const KEY_MAP_MKT = {
+  aereo: 'monto_aereo',
+  combustible: 'monto_combustible',
+  casetas: 'monto_casetas',
+  capacitacion: 'monto_capacitacion'
+};
+
+let tipo = 'Nacional';
+const fmt = n => '$' + Math.round(n).toLocaleString('es-MX');
+
+function recalc() {
+  const key = tipo === 'Nacional' ? 'n' : 'i';
+  let subT = 0;
+  Object.keys(TOPES).forEach(k => {
+    const t = TOPES[k][key];
+    const inp = document.querySelector('.qty[data-key="' + k + '"]');
+    let q = parseFloat(inp.value) || 0;
+    if (TOPES[k].max) q = Math.min(q, TOPES[k].max);
+    const m = q * t;
+    document.getElementById('m-' + k).textContent = fmt(m);
+    document.getElementById('tope-' + k).textContent = fmt(t);
+    subT += m;
+  });
+  let subM = 0;
+  document.querySelectorAll('.mkt-amt').forEach(el => { subM += parseFloat(el.value) || 0; });
+  document.getElementById('sub-tope').textContent = fmt(subT);
+  document.getElementById('sub-mkt').textContent = fmt(subM);
+  document.getElementById('grand').textContent = fmt(subT + subM);
+}
+
+document.querySelectorAll('#seg-tipo button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#seg-tipo button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  tipo = b.dataset.tipo;
+  document.querySelector('[name="tipo_viaje"]').value = tipo;
+  recalc();
+}));
+
+document.querySelectorAll('.qty, .mkt-amt').forEach(el => el.addEventListener('input', recalc));
+
+function calcDias() {
+  const s = document.getElementById('salida').value;
+  const r = document.getElementById('regreso').value;
+  const out = document.getElementById('dias');
+  if (!s || !r) { out.textContent = '—'; return; }
+  const ds = new Date(s), dr = new Date(r);
+  if (dr < ds) { out.textContent = 'rango inválido / invalid range'; return; }
+  const dias = Math.round((dr - ds) / 86400000) + 1;
+  out.textContent = dias + (dias === 1 ? ' día / day' : ' días / days');
+}
+document.getElementById('salida').addEventListener('change', calcDias);
+document.getElementById('regreso').addEventListener('change', calcDias);
+
+const params = new URLSearchParams(location.search);
+['colaborador','colaborador_email','puesto','area','lider_email','destino','motivo','staying_social','num_personas'].forEach(n => {
+  const v = params.get(n);
+  if (v) { const el = document.querySelector('[name="' + n + '"]'); if (el) el.value = v; }
+});
+
+document.getElementById('vt-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const form = e.target;
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+  const btn = document.getElementById('btn-submit');
+  const status = document.getElementById('status');
+  status.className = 'status';
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = 'Enviando / Sending…';
+
+  const fd = new FormData(form);
+  const payload = Object.fromEntries(fd);
+
+  // Normalizar campos Staying Social según categoría seleccionada
+  const ssVal = payload.staying_social || '';
+  const isRepSS = ['clientes','partners','proveedores'].includes(ssVal);
+  payload.ss_monto  = ssVal === 'equipo'        ? (payload.ss_monto_eq  || 0)
+                    : isRepSS                    ? (payload.ss_monto_rep || 0)
+                    : ssVal === 'capacitaciones' ? (payload.ss_monto_cap || 0) : 0;
+  payload.ss_motivo = ssVal === 'equipo'        ? (payload.ss_motivo_eq  || '')
+                    : ssVal === 'capacitaciones' ? (payload.ss_motivo_cap || '') : '';
+  // Calcular nivel de autorización server-side (también lo manda el cliente como referencia)
+  const ssM = parseFloat(payload.ss_monto) || 0;
+  payload.ss_auth_nivel = ssM <= 0 ? '' : ssM <= 1500 ? 'Líder directo'
+    : ssM <= 5000  ? 'Líder directo + BUK'
+    : ssM <= 15000 ? 'Finanzas SiteMinder'
+    : 'Finanzas SiteMinder + Dirección SiteMinder (AUTORIZACIÓN PREVIA)';
+
+  Object.keys(TOPES).forEach(k => {
+    const el = document.querySelector('.qty[data-key="' + k + '"]');
+    payload[KEY_MAP_TOPE[k]] = parseFloat(el.value) || 0;
+  });
+  Object.keys(KEY_MAP_MKT).forEach(k => {
+    const el = document.querySelector('.mkt-amt[data-key="' + k + '"]');
+    payload[KEY_MAP_MKT[k]] = parseFloat(el.value) || 0;
+  });
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      redirect: 'follow'
+    });
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'Error al procesar la solicitud / Error processing request.');
+    status.className = 'status show success';
+    status.innerHTML =
+      '<svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>' +
+      '<div><div class="status-title">Solicitud enviada correctamente. / Request submitted successfully.</div>' +
+      '<div class="status-detail">Recibirás un correo de confirmación. Tu líder directo, Finanzas SiteMinder y Sinergia Corporativo ya fueron notificados.<br><em>You will receive a confirmation email. Your direct manager, SiteMinder Finance, and Sinergia Corporativo have been notified.</em><br>Identificador / Reference:<span class="id-pill">' + (data.solicitud_id || '—') + '</span></div></div>';
+    btn.textContent = 'Enviada ✓ / Submitted ✓';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    status.className = 'status show error';
+    status.innerHTML =
+      '<svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>' +
+      '<div><div class="status-title">No se pudo enviar la solicitud. / Could not submit the request.</div>' +
+      '<div class="status-detail">' + (err.message || 'Intenta de nuevo en un momento o avisa a Sinergia Corporativo. / Try again in a moment or contact Sinergia Corporativo.') + '</div></div>';
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+});
+
+document.getElementById('vt-form').addEventListener('reset', () => {
+  setTimeout(() => {
+    document.querySelectorAll('#seg-tipo button').forEach(x => x.classList.remove('active'));
+    document.querySelector('#seg-tipo button[data-tipo="Nacional"]').classList.add('active');
+    tipo = 'Nacional';
+    document.querySelector('[name="tipo_viaje"]').value = 'Nacional';
+    document.getElementById('dias').textContent = '—';
+    document.getElementById('status').className = 'status';
+    recalc();
+  }, 0);
+});
+
+recalc();
+
+/* ── Staying Social logic ── */
+(function() {
+  const fmtSS = n => '$' + Number(n).toLocaleString('es-MX', {minimumFractionDigits:0}) + ' MXN';
+
+  function ssApplyAuth(wrapId, badgeId, noteId, monto) {
+    const wrap = document.getElementById(wrapId);
+    wrap.style.display = monto > 0 ? 'block' : 'none';
+    if (monto <= 0) return;
+    const badge = document.getElementById(badgeId);
+    const note  = document.getElementById(noteId);
+    if (monto <= 1500) {
+      badge.className = 'ss-auth-badge ok';
+      badge.textContent = 'Líder directo';
+      note.style.display = 'none';
+    } else if (monto <= 5000) {
+      badge.className = 'ss-auth-badge warn';
+      badge.textContent = 'Líder directo + registro en BUK con descripción de contraparte';
+      note.style.display = 'none';
+    } else if (monto <= 15000) {
+      badge.className = 'ss-auth-badge warn';
+      badge.textContent = 'Finanzas SiteMinder + justificación escrita del objetivo comercial';
+      note.style.display = 'none';
+    } else {
+      badge.className = 'ss-auth-badge danger';
+      badge.textContent = 'Finanzas SiteMinder + Dirección SiteMinder';
+      note.style.display = 'flex';
+    }
+  }
+
+  function ssRun() {
+    const ss   = document.getElementById('staying-social').value;
+    const tipo = document.getElementById('ss-tipo').value;
+    const nd   = parseInt(document.getElementById('ss-ndestinatarios').value) || 1;
+    const montoEq  = parseFloat(document.getElementById('ss-monto-eq').value)  || 0;
+    const montoRep = parseFloat(document.getElementById('ss-monto-rep').value) || 0;
+    const montoCap = parseFloat(document.getElementById('ss-monto-cap').value) || 0;
+    const topeComidas   = tipo === 'Nacional' ? 1500 : 2500;  // usa var global `tipo` del form
+    const topeObsequios = 2000 * nd;
+
+    const isEq  = ss === 'equipo';
+    const isRep = ss === 'clientes' || ss === 'partners' || ss === 'proveedores';
+    const isCap = ss === 'capacitaciones';
+    const showSub = isEq || isRep || isCap;
+
+    document.getElementById('ss-subsec').style.display = showSub ? 'block' : 'none';
+    document.getElementById('ss-eq').style.display     = isEq  ? 'block' : 'none';
+    document.getElementById('ss-rep').style.display    = isRep ? 'block' : 'none';
+    document.getElementById('ss-cap').style.display    = isCap ? 'block' : 'none';
+
+    // Número de personas → N/A cuando es N/A o Obsequios
+    const hideNp = !ss || (isRep && tipo === 'obsequios');
+    document.getElementById('num-personas').style.display = hideNp ? 'none'  : 'block';
+    document.getElementById('np-na').style.display        = hideNp ? 'block' : 'none';
+
+    // ── EQUIPO ──
+    if (isEq) {
+      ssApplyAuth('ss-auth-eq-wrap', 'ss-auth-eq-badge', 'ss-auth-eq-note', montoEq);
+    }
+
+    // ── REPRESENTACIÓN ──
+    if (isRep) {
+      const isObsequios = (tipo === 'obsequios');
+      document.getElementById('num-personas').style.display = isObsequios ? 'none'  : 'block';
+      document.getElementById('np-na').style.display        = isObsequios ? 'block' : 'none';
+
+      document.getElementById('ss-comidas-extra').style.display   = tipo === 'comidas'   ? 'block' : 'none';
+      document.getElementById('ss-obsequios-extra').style.display = tipo === 'obsequios' ? 'block' : 'none';
+      document.getElementById('ss-eventos-extra').style.display   = tipo === 'eventos'   ? 'block' : 'none';
+
+      const showTope = tipo === 'comidas' || tipo === 'obsequios';
+      document.getElementById('ss-tope-wrap').style.display = showTope ? 'block' : 'none';
+
+      if (tipo === 'comidas') {
+        const topeReal = (window.tipo === 'Nacional') ? 1500 : 2500;
+        document.getElementById('ss-tope-val').textContent = fmtSS(topeReal) + '/evento · ' + (window.tipo === 'Nacional' ? 'nacional' : 'internacional');
+        const exc = montoRep > 0 && montoRep > topeReal;
+        document.getElementById('ss-tope-chip').className = 'ss-tope-chip ' + (exc ? 'exc' : 'ok');
+        document.getElementById('ss-tope-alert').style.display = exc ? 'flex' : 'none';
+        if (exc) document.getElementById('ss-tope-alert-txt').textContent = 'Excede el tope de política (' + fmtSS(topeReal) + '). Se requiere justificación adicional.';
+      }
+
+      if (tipo === 'obsequios') {
+        document.getElementById('ss-tope-val').textContent = fmtSS(2000) + '/persona × ' + nd + ' = ' + fmtSS(topeObsequios) + ' total';
+        document.getElementById('ss-obs-info-txt').textContent = 'Límite deducible: ' + fmtSS(2000) + ' por persona/año (A.5). Para ' + nd + ' destinatario(s): máx. ' + fmtSS(topeObsequios) + '.';
+        const exc = montoRep > 0 && montoRep > topeObsequios;
+        document.getElementById('ss-tope-chip').className = 'ss-tope-chip ' + (exc ? 'exc' : 'ok');
+        document.getElementById('ss-tope-alert').style.display = exc ? 'flex' : 'none';
+        if (exc) document.getElementById('ss-tope-alert-txt').textContent = 'Excede el límite deducible (' + fmtSS(topeObsequios) + '). La diferencia no será deducible fiscalmente.';
+      }
+
+      ssApplyAuth('ss-auth-rep-wrap', 'ss-auth-rep-badge', 'ss-auth-rep-note', montoRep);
+    }
+
+    // ── CAPACITACIONES ──
+    if (isCap) {
+      ssApplyAuth('ss-auth-cap-wrap', 'ss-auth-cap-badge', 'ss-auth-cap-note', montoCap);
+    }
+  }
+
+  document.getElementById('staying-social').addEventListener('change', ssRun);
+  document.getElementById('ss-tipo').addEventListener('change', ssRun);
+  document.getElementById('ss-ndestinatarios').addEventListener('input', ssRun);
+  document.getElementById('ss-monto-eq').addEventListener('input', ssRun);
+  document.getElementById('ss-monto-rep').addEventListener('input', ssRun);
+  document.getElementById('ss-monto-cap').addEventListener('input', ssRun);
+
+  // Re-run when Nacional/Internacional changes (affects topes)
+  document.querySelectorAll('#seg-tipo button').forEach(b => b.addEventListener('click', ssRun));
+
+  // Include SS fields in form reset
+  const origReset = document.getElementById('vt-form').onreset;
+  document.getElementById('vt-form').addEventListener('reset', () => {
+    setTimeout(() => {
+      document.getElementById('ss-subsec').style.display = 'none';
+      document.getElementById('num-personas').style.display = 'block';
+      document.getElementById('np-na').style.display = 'none';
+    }, 0);
+  });
+
+})();
+</script>
+</body>
+</html>
