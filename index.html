@@ -114,6 +114,24 @@
   .status-title { font-weight: 600; font-size: 14px; }
   .status-detail { font-size: 13px; opacity: 0.92; margin-top: 4px; line-height: 1.5; }
   .id-pill { display: inline-block; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; font-family: ui-monospace, 'SF Mono', Consolas, monospace; font-size: 12px; margin-left: 4px; }
+  /* ── Staying Social subsection ── */
+  .ss-subsec { background: #F3F7FD; border: 1px solid #C8D9EF; border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
+  .ss-lbl { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--blue); margin: 0 0 14px; }
+  .ss-subsec .field label { color: var(--muted); }
+  .ss-subsec textarea { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; font: inherit; font-size: 14px; background: white; color: var(--text); min-height: 70px; resize: vertical; transition: border-color .15s, box-shadow .15s; }
+  .ss-subsec textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,102,204,.12); }
+  .ss-sep { height: 1px; background: #D6E4F5; margin: 14px 0; }
+  .ss-tope-chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 7px; font-size: 13px; font-weight: 500; margin-top: 6px; }
+  .ss-tope-chip.ok { background: var(--blue-light); color: var(--blue); }
+  .ss-tope-chip.exc { background: #FEF3C7; color: #92400E; }
+  .ss-warn { font-size: 12px; color: #92400E; background: #FEF3C7; border-radius: 7px; padding: 7px 10px; margin-top: 7px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+  .ss-info { font-size: 12px; color: #065F46; background: #D1FAE5; border-radius: 7px; padding: 7px 10px; margin-top: 0; margin-bottom: 10px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+  .ss-auth-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 5px 11px; border-radius: 7px; font-weight: 500; flex-wrap: wrap; line-height: 1.4; }
+  .ss-auth-badge.ok { background: var(--success-bg); color: var(--success); }
+  .ss-auth-badge.warn { background: #FEF3C7; color: #92400E; }
+  .ss-auth-badge.danger { background: var(--danger-bg); color: var(--danger); }
+  .ss-auth-note { font-size: 12px; color: var(--danger); background: var(--danger-bg); border-radius: 7px; padding: 7px 10px; margin-top: 8px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+  .np-na { padding: 10px 12px; background: #F3F5F8; border-radius: 8px; font-size: 14px; color: var(--muted-2); border: 1px solid var(--border); font-style: italic; }
   @media (max-width: 640px) {
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .total-card { flex-direction: column; align-items: flex-start; }
@@ -273,18 +291,153 @@
       <label>Staying Social <span class="en">/ Event category</span></label>
       <select name="staying_social" id="staying-social">
         <option value="">— No aplica / N/A —</option>
-        <option>Staying Social con equipo</option>
-        <option>Representación con clientes</option>
-        <option>Representación con partners</option>
-        <option>Representación con proveedores</option>
-        <option>Capacitaciones</option>
+        <option value="equipo">Staying Social con equipo</option>
+        <option value="clientes">Representación con clientes</option>
+        <option value="partners">Representación con partners</option>
+        <option value="proveedores">Representación con proveedores</option>
+        <option value="capacitaciones">Capacitaciones</option>
       </select>
     </div>
     <div class="field">
       <label>Número de personas <span class="en">/ Number of attendees</span></label>
-      <input type="number" name="num_personas" id="num-personas" min="0" step="1" placeholder="0">
+      <input type="number" name="num_personas" id="num-personas" min="1" step="1" placeholder="0">
+      <div class="np-na" id="np-na" style="display:none">N/A</div>
     </div>
   </div>
+
+  <!-- Staying Social subsection (conditional) -->
+  <div class="ss-subsec" id="ss-subsec" style="display:none">
+
+    <!-- EQUIPO -->
+    <div id="ss-eq" style="display:none">
+      <p class="ss-lbl">Reunión interna / Internal meeting</p>
+      <div class="grid-2" style="margin-bottom:12px">
+        <div class="field">
+          <label>Monto de la reunión <span class="en">/ Meeting cost (MXN)</span></label>
+          <input type="number" name="ss_monto_eq"  id="ss-monto-eq" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div></div>
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Motivo de la reunión <span class="en">/ Meeting purpose</span></label>
+        <textarea name="ss_motivo_eq" id="ss-motivo-eq" placeholder="Describe el motivo o agenda de la reunión..."></textarea>
+      </div>
+      <div id="ss-auth-eq-wrap" style="display:none">
+        <div class="ss-sep"></div>
+        <div class="field">
+          <label>Autorización requerida <span class="en">/ Approval required</span></label>
+          <span id="ss-auth-eq-badge" class="ss-auth-badge ok">Líder directo</span>
+          <div id="ss-auth-eq-note" class="ss-auth-note" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2). / Requires <strong>prior</strong> approval before incurring the expense.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPRESENTACIÓN -->
+    <div id="ss-rep" style="display:none">
+      <p class="ss-lbl">Gastos de representación / Representation expenses</p>
+      <div class="field" style="margin-bottom:12px">
+        <label>Tipo de actividad <span class="en">/ Activity type</span></label>
+        <select name="ss_tipo_actividad" id="ss-tipo">
+          <option value="">— Selecciona / Select —</option>
+          <option value="comidas">Comidas y consumos en restaurante</option>
+          <option value="eventos">Eventos corporativos con clientes</option>
+          <option value="obsequios">Obsequios a clientes</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Monto estimado <span class="en">/ Estimated cost (MXN)</span></label>
+        <input type="number" name="ss_monto_rep" id="ss-monto-rep" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <!-- Tope chip -->
+      <div id="ss-tope-wrap" style="display:none;margin-bottom:10px">
+        <div id="ss-tope-chip" class="ss-tope-chip ok">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          <span id="ss-tope-val"></span>
+        </div>
+        <div id="ss-tope-alert" class="ss-warn" style="display:none">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span id="ss-tope-alert-txt"></span>
+        </div>
+      </div>
+      <!-- COMIDAS extra -->
+      <div id="ss-comidas-extra" style="display:none">
+        <div class="field" style="margin-bottom:12px">
+          <label>Nombre del cliente o beneficiario <span class="en">/ Client name</span></label>
+          <input type="text" name="ss_nombre_cliente" placeholder="Nombre completo del cliente o beneficiario...">
+        </div>
+      </div>
+      <!-- OBSEQUIOS extra -->
+      <div id="ss-obsequios-extra" style="display:none">
+        <div class="ss-info" id="ss-obs-info">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="ss-obs-info-txt"></span>
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Número de destinatarios del obsequio <span class="en">/ Number of recipients</span></label>
+          <input type="number" name="ss_num_destinatarios" id="ss-ndestinatarios" value="1" min="1" step="1">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Nombre del cliente, socio o institución <span class="en">/ Recipient name</span></label>
+          <input type="text" name="ss_nombre_destinatario" placeholder="Nombre completo del cliente, socio o institución...">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Objetivo del obsequio <span class="en">/ Gift objective</span></label>
+          <textarea name="ss_objetivo_obsequio" placeholder="Describe el objetivo o motivo del obsequio..."></textarea>
+        </div>
+      </div>
+      <!-- EVENTOS extra -->
+      <div id="ss-eventos-extra" style="display:none">
+        <div class="field" style="margin-bottom:12px">
+          <label>Nombre de la actividad <span class="en">/ Activity name</span></label>
+          <input type="text" name="ss_nombre_actividad" placeholder="Ej. Cena de gala, presentación de producto, visita institucional...">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label>Objetivo comercial del evento <span class="en">/ Commercial objective</span></label>
+          <textarea name="ss_objetivo_evento" placeholder="Describe el objetivo comercial, asistentes y propósito del evento..."></textarea>
+        </div>
+      </div>
+      <!-- Auth representación -->
+      <div id="ss-auth-rep-wrap" style="display:none">
+        <div class="ss-sep"></div>
+        <div class="field">
+          <label>Autorización requerida <span class="en">/ Approval required</span></label>
+          <span id="ss-auth-rep-badge" class="ss-auth-badge ok">Líder directo</span>
+          <div id="ss-auth-rep-note" class="ss-auth-note" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2). / Requires <strong>prior</strong> approval before incurring the expense.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPACITACIONES -->
+    <div id="ss-cap" style="display:none">
+      <p class="ss-lbl">Costo del evento / Event cost</p>
+      <div class="field" style="margin-bottom:12px">
+        <label>Monto total del evento <span class="en">/ Total event cost (MXN)</span></label>
+        <input type="number" name="ss_monto_cap" id="ss-monto-cap" min="0" step="0.01" placeholder="0.00">
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Motivo de la capacitación <span class="en">/ Training purpose</span></label>
+        <textarea name="ss_motivo_cap" id="ss-motivo-cap" placeholder="Describe el objetivo o tema de la capacitación..."></textarea>
+      </div>
+      <div id="ss-auth-cap-wrap" style="display:none">
+        <div class="ss-sep"></div>
+        <div class="field">
+          <label>Autorización requerida <span class="en">/ Approval required</span></label>
+          <span id="ss-auth-cap-badge" class="ss-auth-badge ok">Líder directo</span>
+          <div id="ss-auth-cap-note" class="ss-auth-note" style="display:none">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Requiere autorización <strong>previa</strong> antes de realizar el gasto (política A.2). / Requires <strong>prior</strong> approval before incurring the expense.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /ss-subsec -->
 </div>
 
 <div class="card">
@@ -496,6 +649,22 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
 
   const fd = new FormData(form);
   const payload = Object.fromEntries(fd);
+
+  // Normalizar campos Staying Social según categoría seleccionada
+  const ssVal = payload.staying_social || '';
+  const isRepSS = ['clientes','partners','proveedores'].includes(ssVal);
+  payload.ss_monto  = ssVal === 'equipo'        ? (payload.ss_monto_eq  || 0)
+                    : isRepSS                    ? (payload.ss_monto_rep || 0)
+                    : ssVal === 'capacitaciones' ? (payload.ss_monto_cap || 0) : 0;
+  payload.ss_motivo = ssVal === 'equipo'        ? (payload.ss_motivo_eq  || '')
+                    : ssVal === 'capacitaciones' ? (payload.ss_motivo_cap || '') : '';
+  // Calcular nivel de autorización server-side (también lo manda el cliente como referencia)
+  const ssM = parseFloat(payload.ss_monto) || 0;
+  payload.ss_auth_nivel = ssM <= 0 ? '' : ssM <= 1500 ? 'Líder directo'
+    : ssM <= 5000  ? 'Líder directo + BUK'
+    : ssM <= 15000 ? 'Finanzas SiteMinder'
+    : 'Finanzas SiteMinder + Dirección SiteMinder (AUTORIZACIÓN PREVIA)';
+
   Object.keys(TOPES).forEach(k => {
     const el = document.querySelector('.qty[data-key="' + k + '"]');
     payload[KEY_MAP_TOPE[k]] = parseFloat(el.value) || 0;
@@ -544,6 +713,127 @@ document.getElementById('vt-form').addEventListener('reset', () => {
 });
 
 recalc();
+
+/* ── Staying Social logic ── */
+(function() {
+  const fmtSS = n => '$' + Number(n).toLocaleString('es-MX', {minimumFractionDigits:0}) + ' MXN';
+
+  function ssApplyAuth(wrapId, badgeId, noteId, monto) {
+    const wrap = document.getElementById(wrapId);
+    wrap.style.display = monto > 0 ? 'block' : 'none';
+    if (monto <= 0) return;
+    const badge = document.getElementById(badgeId);
+    const note  = document.getElementById(noteId);
+    if (monto <= 1500) {
+      badge.className = 'ss-auth-badge ok';
+      badge.textContent = 'Líder directo';
+      note.style.display = 'none';
+    } else if (monto <= 5000) {
+      badge.className = 'ss-auth-badge warn';
+      badge.textContent = 'Líder directo + registro en BUK con descripción de contraparte';
+      note.style.display = 'none';
+    } else if (monto <= 15000) {
+      badge.className = 'ss-auth-badge warn';
+      badge.textContent = 'Finanzas SiteMinder + justificación escrita del objetivo comercial';
+      note.style.display = 'none';
+    } else {
+      badge.className = 'ss-auth-badge danger';
+      badge.textContent = 'Finanzas SiteMinder + Dirección SiteMinder';
+      note.style.display = 'flex';
+    }
+  }
+
+  function ssRun() {
+    const ss   = document.getElementById('staying-social').value;
+    const tipo = document.getElementById('ss-tipo').value;
+    const nd   = parseInt(document.getElementById('ss-ndestinatarios').value) || 1;
+    const montoEq  = parseFloat(document.getElementById('ss-monto-eq').value)  || 0;
+    const montoRep = parseFloat(document.getElementById('ss-monto-rep').value) || 0;
+    const montoCap = parseFloat(document.getElementById('ss-monto-cap').value) || 0;
+    const topeComidas   = tipo === 'Nacional' ? 1500 : 2500;  // usa var global `tipo` del form
+    const topeObsequios = 2000 * nd;
+
+    const isEq  = ss === 'equipo';
+    const isRep = ss === 'clientes' || ss === 'partners' || ss === 'proveedores';
+    const isCap = ss === 'capacitaciones';
+    const showSub = isEq || isRep || isCap;
+
+    document.getElementById('ss-subsec').style.display = showSub ? 'block' : 'none';
+    document.getElementById('ss-eq').style.display     = isEq  ? 'block' : 'none';
+    document.getElementById('ss-rep').style.display    = isRep ? 'block' : 'none';
+    document.getElementById('ss-cap').style.display    = isCap ? 'block' : 'none';
+
+    // Número de personas → N/A cuando es N/A o Obsequios
+    const hideNp = !ss || (isRep && tipo === 'obsequios');
+    document.getElementById('num-personas').style.display = hideNp ? 'none'  : 'block';
+    document.getElementById('np-na').style.display        = hideNp ? 'block' : 'none';
+
+    // ── EQUIPO ──
+    if (isEq) {
+      ssApplyAuth('ss-auth-eq-wrap', 'ss-auth-eq-badge', 'ss-auth-eq-note', montoEq);
+    }
+
+    // ── REPRESENTACIÓN ──
+    if (isRep) {
+      const isObsequios = (tipo === 'obsequios');
+      document.getElementById('num-personas').style.display = isObsequios ? 'none'  : 'block';
+      document.getElementById('np-na').style.display        = isObsequios ? 'block' : 'none';
+
+      document.getElementById('ss-comidas-extra').style.display   = tipo === 'comidas'   ? 'block' : 'none';
+      document.getElementById('ss-obsequios-extra').style.display = tipo === 'obsequios' ? 'block' : 'none';
+      document.getElementById('ss-eventos-extra').style.display   = tipo === 'eventos'   ? 'block' : 'none';
+
+      const showTope = tipo === 'comidas' || tipo === 'obsequios';
+      document.getElementById('ss-tope-wrap').style.display = showTope ? 'block' : 'none';
+
+      if (tipo === 'comidas') {
+        const topeReal = (window.tipo === 'Nacional') ? 1500 : 2500;
+        document.getElementById('ss-tope-val').textContent = fmtSS(topeReal) + '/evento · ' + (window.tipo === 'Nacional' ? 'nacional' : 'internacional');
+        const exc = montoRep > 0 && montoRep > topeReal;
+        document.getElementById('ss-tope-chip').className = 'ss-tope-chip ' + (exc ? 'exc' : 'ok');
+        document.getElementById('ss-tope-alert').style.display = exc ? 'flex' : 'none';
+        if (exc) document.getElementById('ss-tope-alert-txt').textContent = 'Excede el tope de política (' + fmtSS(topeReal) + '). Se requiere justificación adicional.';
+      }
+
+      if (tipo === 'obsequios') {
+        document.getElementById('ss-tope-val').textContent = fmtSS(2000) + '/persona × ' + nd + ' = ' + fmtSS(topeObsequios) + ' total';
+        document.getElementById('ss-obs-info-txt').textContent = 'Límite deducible: ' + fmtSS(2000) + ' por persona/año (A.5). Para ' + nd + ' destinatario(s): máx. ' + fmtSS(topeObsequios) + '.';
+        const exc = montoRep > 0 && montoRep > topeObsequios;
+        document.getElementById('ss-tope-chip').className = 'ss-tope-chip ' + (exc ? 'exc' : 'ok');
+        document.getElementById('ss-tope-alert').style.display = exc ? 'flex' : 'none';
+        if (exc) document.getElementById('ss-tope-alert-txt').textContent = 'Excede el límite deducible (' + fmtSS(topeObsequios) + '). La diferencia no será deducible fiscalmente.';
+      }
+
+      ssApplyAuth('ss-auth-rep-wrap', 'ss-auth-rep-badge', 'ss-auth-rep-note', montoRep);
+    }
+
+    // ── CAPACITACIONES ──
+    if (isCap) {
+      ssApplyAuth('ss-auth-cap-wrap', 'ss-auth-cap-badge', 'ss-auth-cap-note', montoCap);
+    }
+  }
+
+  document.getElementById('staying-social').addEventListener('change', ssRun);
+  document.getElementById('ss-tipo').addEventListener('change', ssRun);
+  document.getElementById('ss-ndestinatarios').addEventListener('input', ssRun);
+  document.getElementById('ss-monto-eq').addEventListener('input', ssRun);
+  document.getElementById('ss-monto-rep').addEventListener('input', ssRun);
+  document.getElementById('ss-monto-cap').addEventListener('input', ssRun);
+
+  // Re-run when Nacional/Internacional changes (affects topes)
+  document.querySelectorAll('#seg-tipo button').forEach(b => b.addEventListener('click', ssRun));
+
+  // Include SS fields in form reset
+  const origReset = document.getElementById('vt-form').onreset;
+  document.getElementById('vt-form').addEventListener('reset', () => {
+    setTimeout(() => {
+      document.getElementById('ss-subsec').style.display = 'none';
+      document.getElementById('num-personas').style.display = 'block';
+      document.getElementById('np-na').style.display = 'none';
+    }, 0);
+  });
+
+})();
 </script>
 </body>
 </html>
