@@ -755,7 +755,7 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
     const ssAuth = ssM <= 0 ? '' : ssM <= 1500 ? 'Líder directo'
       : ssM <= 5000  ? 'Líder directo + registro BUK'
       : ssM <= 15000 ? 'Finanzas SiteMinder + justificación escrita'
-      : 'Finanzas SiteMinder + Dirección SiteMinder (AUTORIZACIÓN PREVIA)';
+      : 'Finanzas SiteMinder + Dirección SiteMinder (PREVIA)';
     // Sobreescribir payload con valores del DOM
     payload.ss_categoria       = ssCat;
     payload.ss_tipo_actividad  = tipoAct;
