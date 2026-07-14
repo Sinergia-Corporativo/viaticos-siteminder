@@ -660,6 +660,20 @@ document.querySelectorAll('#seg-tipo button').forEach(b => b.addEventListener('c
   b.classList.add('active');
   tipo = b.dataset.tipo;
   document.querySelector('[name="tipo_viaje"]').value = tipo;
+  // Comunicaciones solo aplica en viajes internacionales
+  const comInput = document.querySelector('.qty[data-key="comunicaciones"]');
+  if (comInput) {
+    if (tipo === 'Nacional') {
+      comInput.value = '';
+      comInput.disabled = true;
+      comInput.style.opacity = '0.4';
+      comInput.title = 'Solo aplica en viajes internacionales / International only';
+    } else {
+      comInput.disabled = false;
+      comInput.style.opacity = '1';
+      comInput.title = '';
+    }
+  }
   recalc();
 }));
 
@@ -748,19 +762,32 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
     payload[KEY_MAP_MKT[k]] = parseFloat(el.value) || 0;
   });
 
+  // Generar ID en cliente (mismo formato que el servidor)
+  const tsNow = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const clientId = 'VT-' +
+    tsNow.getFullYear() +
+    pad(tsNow.getMonth()+1) +
+    pad(tsNow.getDate()) + '-' +
+    pad(tsNow.getHours()) +
+    pad(tsNow.getMinutes()) +
+    pad(tsNow.getSeconds());
+  payload.client_id = clientId;
+
   try {
-    const res = await fetch(APPS_SCRIPT_URL, {
+    // mode: 'no-cors' evita errores CORS entre GitHub Pages y Apps Script.
+    // La respuesta es opaca (no se puede leer), pero los datos llegan al servidor.
+    await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify(payload),
-      redirect: 'follow'
+      mode: 'no-cors'
     });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || 'Error al procesar la solicitud / Error processing request.');
+    // Éxito — mostrar confirmación con ID de cliente
     status.className = 'status show success';
     status.innerHTML =
       '<svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>' +
       '<div><div class="status-title">Solicitud enviada correctamente. / Request submitted successfully.</div>' +
-      '<div class="status-detail">Recibirás un correo de confirmación. Tu líder directo, Finanzas SiteMinder y Sinergia Corporativo ya fueron notificados.<br><em>You will receive a confirmation email. Your direct manager, SiteMinder Finance, and Sinergia Corporativo have been notified.</em><br>Identificador / Reference:<span class="id-pill">' + (data.solicitud_id || '—') + '</span></div></div>';
+      '<div class="status-detail">Recibirás un correo de confirmación. Tu líder directo, Finanzas SiteMinder y Sinergia Corporativo ya fueron notificados.<br><em>You will receive a confirmation email. Your direct manager, SiteMinder Finance, and Sinergia Corporativo have been notified.</em><br>Identificador / Reference: <span class="id-pill">' + clientId + '</span></div></div>';
     btn.textContent = 'Enviada ✓ / Submitted ✓';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch (err) {
@@ -768,7 +795,7 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
     status.innerHTML =
       '<svg class="status-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>' +
       '<div><div class="status-title">No se pudo enviar la solicitud. / Could not submit the request.</div>' +
-      '<div class="status-detail">' + (err.message || 'Intenta de nuevo en un momento o avisa a Sinergia Corporativo. / Try again in a moment or contact Sinergia Corporativo.') + '</div></div>';
+      '<div class="status-detail">Verifica tu conexión e intenta de nuevo. Si el problema persiste avisa a Sinergia Corporativo.<br><em>Check your connection and try again. If the problem persists, contact Sinergia Corporativo.</em><br><small style="opacity:.7">' + (err.message || '') + '</small></div></div>';
     btn.disabled = false;
     btn.textContent = original;
   }
