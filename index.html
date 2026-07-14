@@ -803,12 +803,61 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
 
 document.getElementById('vt-form').addEventListener('reset', () => {
   setTimeout(() => {
+    // Tipo de solicitud: volver al estado inicial
+    document.getElementById('btn-viaje').classList.remove('active');
+    document.getElementById('btn-ss').classList.remove('active');
+    document.getElementById('modo-viaje').style.display = 'none';
+    document.getElementById('modo-ss').style.display    = 'none';
+    tipoSolicitud = '';
+    const hiddenTipo = document.getElementById('tipo-solicitud-val');
+    if (hiddenTipo) hiddenTipo.value = '';
+
+    // Reactivar required en campos de viaje
+    ['destino','motivo'].forEach(name => {
+      const el = document.querySelector('[name="' + name + '"]');
+      if (el) el.required = true;
+    });
+    ['salida','regreso'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.required = true;
+    });
+    const ssCatEl = document.getElementById('ss-cat-sa');
+    const ssFecEl = document.getElementById('ss-fecha-ini');
+    if (ssCatEl) ssCatEl.required = false;
+    if (ssFecEl) ssFecEl.required = false;
+
+    // Viaje: reset Nacional
     document.querySelectorAll('#seg-tipo button').forEach(x => x.classList.remove('active'));
     document.querySelector('#seg-tipo button[data-tipo="Nacional"]').classList.add('active');
     tipo = 'Nacional';
     document.querySelector('[name="tipo_viaje"]').value = 'Nacional';
     document.getElementById('dias').textContent = '—';
+    document.getElementById('ss-dias-evento').textContent = '—';
+
+    // Comunicaciones: rehabilitar
+    const comInput = document.querySelector('.qty[data-key="comunicaciones"]');
+    if (comInput) { comInput.disabled = false; comInput.style.opacity = '1'; }
+
+    // SS standalone: ocultar subsecciones
+    ['ss-subsec-sa','ss-eq-sa','ss-rep-sa','ss-cap-sa'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.style.display = 'none';
+    });
+    const ssNpEl = document.getElementById('ss-np-sa');
+    if (ssNpEl) ssNpEl.style.display = 'block';
+    const ssNaNpEl = document.getElementById('ss-np-na-sa');
+    if (ssNaNpEl) ssNaNpEl.style.display = 'none';
+
+    // Etiqueta total
+    const tl = document.querySelector('.total-label');
+    if (tl) tl.textContent = 'Total a dispersar / Amount to disburse';
+
+    // Botón enviar
+    const btn = document.getElementById('btn-submit');
+    if (btn) { btn.disabled = false; btn.textContent = 'Enviar solicitud / Submit request'; }
+
+    // Status
     document.getElementById('status').className = 'status';
+
     recalc();
   }, 0);
 });
@@ -825,9 +874,27 @@ function setTipoSol(t) {
   document.getElementById('btn-ss').classList.toggle('active', t === 'ss');
   document.getElementById('modo-viaje').style.display = t === 'viaje' ? 'block' : 'none';
   document.getElementById('modo-ss').style.display    = t === 'ss'    ? 'block' : 'none';
+
   // Actualizar hidden input para que lo recoja el FormData
   const hiddenTipo = document.getElementById('tipo-solicitud-val');
   if (hiddenTipo) hiddenTipo.value = t === 'viaje' ? 'Viaje' : 'Staying Social';
+
+  // ── Campos requeridos: activar solo los del modo visible ─────────────────
+  // Viaje: destino, motivo, fecha_salida, fecha_regreso
+  ['destino','motivo'].forEach(name => {
+    const el = document.querySelector('[name="' + name + '"]');
+    if (el) el.required = (t === 'viaje');
+  });
+  ['salida','regreso'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.required = (t === 'viaje');
+  });
+  // SS standalone: categoría y fecha inicio
+  const ssCat = document.getElementById('ss-cat-sa');
+  const ssFec = document.getElementById('ss-fecha-ini');
+  if (ssCat) ssCat.required = (t === 'ss');
+  if (ssFec) ssFec.required = (t === 'ss');
+
   const tl = document.querySelector('.total-label');
   if (tl) tl.textContent = t === 'ss' ? 'Monto del evento / Event amount' : 'Total a dispersar / Amount to disburse';
   if (t === 'ss') recalcSS(); else recalc();
