@@ -736,31 +736,47 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
 
   // ── Normalización Staying Social (modo standalone) ────────────────────────
   if (isSS) {
-    const ssCat   = payload.ss_categoria || '';
+    // Leer directo del DOM para garantizar valores aunque FormData falle
+    const ssCat   = document.getElementById('ss-cat-sa')?.value || '';
+    const tipoAct = document.getElementById('ss-tipo-sa')?.value || '';
+    const ssNp    = document.getElementById('ss-np-sa')?.value   || '';
+    const ssFIni  = document.getElementById('ss-fecha-ini')?.value || '';
+    const ssFFin  = document.getElementById('ss-fecha-fin')?.value || '';
+    const ssDiasEl= document.getElementById('ss-dias-evento')?.textContent || '';
+    const ssDias  = parseInt(ssDiasEl) || '';
+    // Monto según categoría
     const isRepSS = ['clientes','partners','proveedores'].includes(ssCat);
-    payload.ss_monto = ssCat === 'equipo'          ? (parseFloat(payload.ss_monto_eq)  || 0)
-                     : isRepSS                      ? (parseFloat(payload.ss_monto_rep) || 0)
-                     : ssCat === 'capacitaciones'   ? (parseFloat(payload.ss_monto_cap) || 0) : 0;
-    payload.ss_motivo = ssCat === 'equipo'          ? (payload.ss_motivo_eq  || '')
-                      : ssCat === 'capacitaciones'  ? (payload.ss_motivo_cap || '') : '';
-    const ssM = parseFloat(payload.ss_monto) || 0;
-    payload.ss_auth_nivel = ssM <= 0 ? '' : ssM <= 1500 ? 'Líder directo'
+    const ssMonto = ssCat === 'equipo'        ? (parseFloat(document.getElementById('ss-monto-eq-sa')?.value)  || 0)
+                  : isRepSS                    ? (parseFloat(document.getElementById('ss-monto-rep-sa')?.value) || 0)
+                  : ssCat === 'capacitaciones' ? (parseFloat(document.getElementById('ss-monto-cap-sa')?.value) || 0) : 0;
+    const ssMotivo = ssCat === 'equipo'        ? (document.getElementById('ss-motivo-eq')?.value  || '')
+                   : ssCat === 'capacitaciones' ? (document.getElementById('ss-motivo-cap')?.value || '') : '';
+    const ssM = ssMonto || 0;
+    const ssAuth = ssM <= 0 ? '' : ssM <= 1500 ? 'Líder directo'
       : ssM <= 5000  ? 'Líder directo + registro BUK'
       : ssM <= 15000 ? 'Finanzas SiteMinder + justificación escrita'
       : 'Finanzas SiteMinder + Dirección SiteMinder (AUTORIZACIÓN PREVIA)';
+    // Sobreescribir payload con valores del DOM
+    payload.ss_categoria       = ssCat;
+    payload.ss_tipo_actividad  = tipoAct;
+    payload.ss_num_personas    = ssNp;
+    payload.ss_fecha_inicio    = ssFIni;
+    payload.ss_fecha_fin       = ssFFin;
+    payload.ss_dias_evento     = ssDias;
+    payload.ss_monto           = ssMonto;
+    payload.ss_motivo          = ssMotivo;
+    payload.ss_auth_nivel      = ssAuth;
+    // Nombre cliente, destinatario, objetivos (ya vienen del FormData)
+    // Limpiar campos de viaje para SS
+    ['dias_alimentacion','noches_hospedaje','trayectos_transporte_local',
+     'dias_renta_auto','dias_comunicaciones'].forEach(k => { payload[k] = ''; });
+    ['monto_aereo','monto_combustible','monto_casetas','monto_capacitacion'].forEach(k => { payload[k] = ''; });
   } else {
     payload.ss_monto = ''; payload.ss_motivo = ''; payload.ss_auth_nivel = '';
     payload.ss_categoria = ''; payload.ss_tipo_actividad = '';
+    payload.ss_num_personas = ''; payload.ss_fecha_inicio = '';
+    payload.ss_fecha_fin = ''; payload.ss_dias_evento = '';
   }
-
-  Object.keys(TOPES).forEach(k => {
-    const el = document.querySelector('.qty[data-key="' + k + '"]');
-    payload[KEY_MAP_TOPE[k]] = parseFloat(el.value) || 0;
-  });
-  Object.keys(KEY_MAP_MKT).forEach(k => {
-    const el = document.querySelector('.mkt-amt[data-key="' + k + '"]');
-    payload[KEY_MAP_MKT[k]] = parseFloat(el.value) || 0;
-  });
 
   // Generar ID en cliente (mismo formato que el servidor)
   const tsNow = new Date();
