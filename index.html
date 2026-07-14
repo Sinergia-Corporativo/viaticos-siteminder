@@ -30,7 +30,7 @@
     background: var(--bg);
     color: var(--text);
     font-size: 15px;
-    line-height: 1.45;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -174,7 +174,7 @@
 
 <p class="subtitle">
   Llena la información de tu viaje. El monto se calcula automáticamente conforme al Anexo B y se dispersa en tu tarjeta Minu.
-  <span class="en">Fill in your travel information.The amount is calculated automatically per Annex B and disbursed to your Minu card.</span>
+  <span class="en">Fill in your travel information. The amount is calculated automatically per Annex B and disbursed to your Minu card.</span>
 </p>
 
 <div class="total-card">
@@ -269,6 +269,7 @@
 <div class="card" id="card-tipo-solicitud">
   <h2><span class="dot"></span>Tipo de solicitud <span class="en">/ Request type</span></h2>
   <div class="card-sep"></div>
+  <input type="hidden" name="tipo_solicitud" id="tipo-solicitud-val" value="">
   <div class="tipo-sol-wrap" role="radiogroup">
     <button type="button" class="tipo-sol-btn" id="btn-viaje" onclick="setTipoSol('viaje')">
       <span class="ico">✈️</span>
@@ -608,7 +609,7 @@
 </div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydr2FW8bEV3FRiOC2mTsaRlkF9opF-9_KvRD6qUE222GOWsJ62pWvOpKhR8N6raag5/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwC-xwoTsMJTXlnnhougx2GYMh7f7SjAWlYph9C9TEBWkaLZLult2RSzB3IxRGCKoMS/exec';
 
 const TOPES = {
   alimentacion:     { n: 750,  i: 1500, max: null },
@@ -700,20 +701,43 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
   const fd = new FormData(form);
   const payload = Object.fromEntries(fd);
 
-  // Normalizar campos Staying Social según categoría seleccionada
-  const ssVal = payload.staying_social || '';
-  const isRepSS = ['clientes','partners','proveedores'].includes(ssVal);
-  payload.ss_monto  = ssVal === 'equipo'        ? (payload.ss_monto_eq  || 0)
-                    : isRepSS                    ? (payload.ss_monto_rep || 0)
-                    : ssVal === 'capacitaciones' ? (payload.ss_monto_cap || 0) : 0;
-  payload.ss_motivo = ssVal === 'equipo'        ? (payload.ss_motivo_eq  || '')
-                    : ssVal === 'capacitaciones' ? (payload.ss_motivo_cap || '') : '';
-  // Calcular nivel de autorización server-side (también lo manda el cliente como referencia)
-  const ssM = parseFloat(payload.ss_monto) || 0;
-  payload.ss_auth_nivel = ssM <= 0 ? '' : ssM <= 1500 ? 'Líder directo'
-    : ssM <= 5000  ? 'Líder directo + BUK'
-    : ssM <= 15000 ? 'Finanzas SiteMinder'
-    : 'Finanzas SiteMinder + Dirección SiteMinder (AUTORIZACIÓN PREVIA)';
+  // ── Tipo de solicitud ─────────────────────────────────────────────────────
+  const tipoSol  = payload.tipo_solicitud || '';
+  const isViaje  = tipoSol === 'Viaje';
+  const isSS     = tipoSol === 'Staying Social';
+
+  // ── Días del viaje (div, no es campo del form) ────────────────────────────
+  const diasEl = document.getElementById('dias');
+  payload.dias = diasEl ? (parseInt(diasEl.textContent) || '') : '';
+
+  // ── Topes y mercado (solo si es Viaje) ────────────────────────────────────
+  Object.keys(TOPES).forEach(k => {
+    const el = document.querySelector('.qty[data-key="' + k + '"]');
+    payload[KEY_MAP_TOPE[k]] = el ? (parseFloat(el.value) || 0) : 0;
+  });
+  Object.keys(KEY_MAP_MKT).forEach(k => {
+    const el = document.querySelector('.mkt-amt[data-key="' + k + '"]');
+    payload[KEY_MAP_MKT[k]] = el ? (parseFloat(el.value) || 0) : 0;
+  });
+
+  // ── Normalización Staying Social (modo standalone) ────────────────────────
+  if (isSS) {
+    const ssCat   = payload.ss_categoria || '';
+    const isRepSS = ['clientes','partners','proveedores'].includes(ssCat);
+    payload.ss_monto = ssCat === 'equipo'          ? (parseFloat(payload.ss_monto_eq)  || 0)
+                     : isRepSS                      ? (parseFloat(payload.ss_monto_rep) || 0)
+                     : ssCat === 'capacitaciones'   ? (parseFloat(payload.ss_monto_cap) || 0) : 0;
+    payload.ss_motivo = ssCat === 'equipo'          ? (payload.ss_motivo_eq  || '')
+                      : ssCat === 'capacitaciones'  ? (payload.ss_motivo_cap || '') : '';
+    const ssM = parseFloat(payload.ss_monto) || 0;
+    payload.ss_auth_nivel = ssM <= 0 ? '' : ssM <= 1500 ? 'Líder directo'
+      : ssM <= 5000  ? 'Líder directo + registro BUK'
+      : ssM <= 15000 ? 'Finanzas SiteMinder + justificación escrita'
+      : 'Finanzas SiteMinder + Dirección SiteMinder (AUTORIZACIÓN PREVIA)';
+  } else {
+    payload.ss_monto = ''; payload.ss_motivo = ''; payload.ss_auth_nivel = '';
+    payload.ss_categoria = ''; payload.ss_tipo_actividad = '';
+  }
 
   Object.keys(TOPES).forEach(k => {
     const el = document.querySelector('.qty[data-key="' + k + '"]');
@@ -774,6 +798,9 @@ function setTipoSol(t) {
   document.getElementById('btn-ss').classList.toggle('active', t === 'ss');
   document.getElementById('modo-viaje').style.display = t === 'viaje' ? 'block' : 'none';
   document.getElementById('modo-ss').style.display    = t === 'ss'    ? 'block' : 'none';
+  // Actualizar hidden input para que lo recoja el FormData
+  const hiddenTipo = document.getElementById('tipo-solicitud-val');
+  if (hiddenTipo) hiddenTipo.value = t === 'viaje' ? 'Viaje' : 'Staying Social';
   const tl = document.querySelector('.total-label');
   if (tl) tl.textContent = t === 'ss' ? 'Monto del evento / Event amount' : 'Total a dispersar / Amount to disburse';
   if (t === 'ss') recalcSS(); else recalc();
