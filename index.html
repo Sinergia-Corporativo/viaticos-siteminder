@@ -895,6 +895,24 @@ function setTipoSol(t) {
   if (ssCat) ssCat.required = (t === 'ss');
   if (ssFec) ssFec.required = (t === 'ss');
 
+  // Comunicaciones: deshabilitar para Nacional al mostrar modo Viaje
+  if (t === 'viaje') {
+    const comInput = document.querySelector('.qty[data-key="comunicaciones"]');
+    if (comInput) {
+      const isNac = (tipo === 'Nacional');
+      comInput.disabled     = isNac;
+      comInput.style.opacity = isNac ? '0.4' : '1';
+      comInput.title         = isNac ? 'Solo aplica en viajes internacionales / International only' : '';
+      if (isNac) comInput.value = '';
+    }
+  }
+
+  // Subtotales Con tope / Tarifa mercado: ocultar en modo SS
+  const subSides = document.querySelectorAll('.total-side');
+  if (subSides.length) {
+    subSides.forEach(el => el.style.display = t === 'ss' ? 'none' : '');
+  }
+
   const tl = document.querySelector('.total-label');
   if (tl) tl.textContent = t === 'ss' ? 'Monto del evento / Event amount' : 'Total a dispersar / Amount to disburse';
   if (t === 'ss') recalcSS(); else recalc();
