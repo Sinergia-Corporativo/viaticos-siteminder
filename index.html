@@ -144,6 +144,24 @@
   .ss-auth-badge.danger { background: var(--danger-bg); color: var(--danger); }
   .ss-auth-note { font-size: 12px; color: var(--danger); background: var(--danger-bg); border-radius: 7px; padding: 7px 10px; margin-top: 8px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
   .np-na { padding: 10px 12px; background: #F3F5F8; border-radius: 8px; font-size: 14px; color: var(--muted-2); border: 1px solid var(--border); font-style: italic; }
+  .aviso-2s {
+    display: none; align-items: flex-start; gap: 8px;
+    background: #FEF3C7; color: #92400E; border-radius: 8px;
+    padding: 10px 14px; font-size: 13px; line-height: 1.5;
+    border-left: 3px solid #F59E0B; margin-top: 12px;
+  }
+  .aviso-2s.show { display: flex; }
+  .aviso-2s svg { flex-shrink: 0; margin-top: 2px; }
+  .aviso-2s-inner { flex: 1; }
+  .urgencia-input {
+    width: 100%; margin-top: 10px; padding: 9px 12px;
+    border: 1.5px solid #F59E0B; border-radius: 8px;
+    font: inherit; font-size: 13px; background: white; color: var(--text);
+    min-height: 68px; resize: vertical; transition: border-color .15s, box-shadow .15s;
+  }
+  .urgencia-input:focus { outline: none; border-color: #D97706; box-shadow: 0 0 0 3px rgba(245,158,11,.18); }
+  .urgencia-input::placeholder { color: var(--muted-2); }
+  .urgencia-label { display: block; font-size: 12px; font-weight: 600; color: #92400E; margin-top: 10px; margin-bottom: 4px; }
   @media (max-width: 640px) {
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .total-card { flex-direction: column; align-items: flex-start; }
@@ -421,6 +439,16 @@
     <input type="number" min="0" step="1" class="mkt-amt" data-key="capacitacion" placeholder="$0">
   </div>
 </div>
+  <div class="aviso-2s" id="aviso-viaje-2s">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div class="aviso-2s-inner">
+      ⚠️ Esta solicitud se está enviando con <strong>menos de 2 semanas de anticipación</strong> (política 10.1). Es necesario justificar el motivo de urgencia.<br>
+      <em style="font-weight:400">This request is being submitted with less than 2 weeks' notice (policy 10.1). An emergency justification is required.</em>
+      <span class="urgencia-label">Motivo de urgencia / Emergency reason <span style="color:#DC2626">*</span></span>
+      <textarea class="urgencia-input" id="motivo-urgencia-viaje" name="motivo_urgencia"
+        placeholder="Describe brevemente por qué no fue posible enviar con anticipación... / Briefly explain why advance notice was not possible..."></textarea>
+    </div>
+  </div>
 </div><!-- /modo-viaje -->
 
 <!-- ── MODO STAYING SOCIAL STANDALONE ── -->
@@ -460,6 +488,16 @@
     <div class="field">
       <label>Días <span class="en">/ Days</span></label>
       <div class="computed-days" id="ss-dias-evento">—</div>
+    </div>
+  </div>
+  <div class="aviso-2s" id="aviso-ss-2s">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div class="aviso-2s-inner">
+      ⚠️ Esta solicitud se está enviando con <strong>menos de 2 semanas de anticipación</strong> (política 10.1). Es necesario justificar el motivo de urgencia.<br>
+      <em style="font-weight:400">This request is being submitted with less than 2 weeks' notice (policy 10.1). An emergency justification is required.</em>
+      <span class="urgencia-label">Motivo de urgencia / Emergency reason <span style="color:#DC2626">*</span></span>
+      <textarea class="urgencia-input" id="motivo-urgencia-ss" name="motivo_urgencia"
+        placeholder="Describe brevemente por qué no fue posible enviar con anticipación... / Briefly explain why advance notice was not possible..."></textarea>
     </div>
   </div>
 
@@ -679,15 +717,32 @@ document.querySelectorAll('#seg-tipo button').forEach(b => b.addEventListener('c
 
 document.querySelectorAll('.qty, .mkt-amt').forEach(el => el.addEventListener('input', recalc));
 
+function check2Semanas(fecha, avisId, urgId) {
+  const aviso = document.getElementById(avisId);
+  const urgEl = urgId ? document.getElementById(urgId) : null;
+  if (!aviso) return;
+  if (!fecha) {
+    aviso.classList.remove('show');
+    if (urgEl) { urgEl.required = false; urgEl.value = ''; }
+    return;
+  }
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  const limite = new Date(hoy); limite.setDate(limite.getDate() + 14);
+  const f = new Date(fecha + 'T12:00:00');
+  const esUrgente = f <= limite;
+  aviso.classList.toggle('show', esUrgente);
+  if (urgEl) urgEl.required = esUrgente;
+}
 function calcDias() {
   const s = document.getElementById('salida').value;
   const r = document.getElementById('regreso').value;
   const out = document.getElementById('dias');
-  if (!s || !r) { out.textContent = '—'; return; }
+  if (!s || !r) { out.textContent = '—'; check2Semanas(s, 'aviso-viaje-2s', 'motivo-urgencia-viaje'); return; }
   const ds = new Date(s), dr = new Date(r);
   if (dr < ds) { out.textContent = 'rango inválido / invalid range'; return; }
   const dias = Math.round((dr - ds) / 86400000) + 1;
   out.textContent = dias + (dias === 1 ? ' día / day' : ' días / days');
+  check2Semanas(s, 'aviso-viaje-2s', 'motivo-urgencia-viaje');
 }
 document.getElementById('salida').addEventListener('change', calcDias);
 document.getElementById('regreso').addEventListener('change', calcDias);
@@ -854,6 +909,15 @@ document.getElementById('vt-form').addEventListener('reset', () => {
     const comInput = document.querySelector('.qty[data-key="comunicaciones"]');
     if (comInput) { comInput.disabled = false; comInput.style.opacity = '1'; }
 
+    // Limpiar urgencia
+    ['motivo-urgencia-viaje','motivo-urgencia-ss'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.value = ''; el.required = false; }
+    });
+    ['aviso-viaje-2s','aviso-ss-2s'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.classList.remove('show');
+    });
+
     // SS standalone: ocultar subsecciones
     ['ss-subsec-sa','ss-eq-sa','ss-rep-sa','ss-cap-sa'].forEach(id => {
       const el = document.getElementById(id); if (el) el.style.display = 'none';
@@ -943,6 +1007,7 @@ function calcDiasEvento() {
     const dias = Math.max(1, Math.round((d2-d1)/86400000)+1);
     el.textContent = dias + (dias===1 ? ' día' : ' días');
   } else el.textContent = '—';
+  check2Semanas(ini, 'aviso-ss-2s', 'motivo-urgencia-ss');
 }
 
 function ssAuthSA(wId, bId, tId, nId, monto) {
