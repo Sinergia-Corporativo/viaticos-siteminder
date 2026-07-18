@@ -490,6 +490,7 @@
       <div class="computed-days" id="ss-dias-evento">—</div>
     </div>
   </div>
+
   <div class="aviso-2s" id="aviso-ss-2s">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     <div class="aviso-2s-inner">
@@ -721,15 +722,10 @@ function check2Semanas(fecha, avisId, urgId) {
   const aviso = document.getElementById(avisId);
   const urgEl = urgId ? document.getElementById(urgId) : null;
   if (!aviso) return;
-  if (!fecha) {
-    aviso.classList.remove('show');
-    if (urgEl) { urgEl.required = false; urgEl.value = ''; }
-    return;
-  }
+  if (!fecha) { aviso.classList.remove('show'); if (urgEl) { urgEl.required = false; urgEl.value = ''; } return; }
   const hoy = new Date(); hoy.setHours(0,0,0,0);
   const limite = new Date(hoy); limite.setDate(limite.getDate() + 14);
-  const f = new Date(fecha + 'T12:00:00');
-  const esUrgente = f <= limite;
+  const esUrgente = new Date(fecha + 'T12:00:00') <= limite;
   aviso.classList.toggle('show', esUrgente);
   if (urgEl) urgEl.required = esUrgente;
 }
@@ -807,10 +803,10 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
     const ssMotivo = ssCat === 'equipo'        ? (document.getElementById('ss-motivo-eq')?.value  || '')
                    : ssCat === 'capacitaciones' ? (document.getElementById('ss-motivo-cap')?.value || '') : '';
     const ssM = ssMonto || 0;
-    const ssAuth = ssM <= 0 ? '' : ssM <= 7000 ? 'Líder directo'
-      : ssM <= 10000  ? 'Líder directo + Finanzas SiteMinder'
+    const ssAuth = ssM <= 0 ? '' : ssM <= 8000 ? 'Líder directo'
+      : ssM <= 10000 ? 'Líder directo + Finanzas SiteMinder'
       : ssM <= 20000 ? 'Líder directo + Finanzas SiteMinder + justificación escrita'
-      : 'Finanzas SiteMinder + Dirección SiteMinder (PREVIA)';
+      : 'Monto superior a $20,000 — Dirección SiteMinder';
     // Sobreescribir payload con valores del DOM
     payload.ss_categoria       = ssCat;
     payload.ss_tipo_actividad  = tipoAct;
@@ -1016,10 +1012,10 @@ function ssAuthSA(wId, bId, tId, nId, monto) {
   if (monto <= 0) return;
   const b = document.getElementById(bId), t = document.getElementById(tId), n = document.getElementById(nId);
   if (!t) return;
-  if (monto<=7000)        { b.className='ss-auth-badge ok';     t.textContent='Líder directo'; n.style.display='none'; }
-  else if (monto<=10000)   { b.className='ss-auth-badge warn';   t.textContent='Líder directo + registro en BUK'; n.style.display='none'; }
-  else if (monto<=20000)  { b.className='ss-auth-badge warn';   t.textContent='Finanzas SiteMinder + justificación escrita'; n.style.display='none'; }
-  else                     { b.className='ss-auth-badge danger'; t.textContent='Finanzas SiteMinder + Dirección SiteMinder'; n.style.display='flex'; }
+  if (monto<=8000)        { b.className='ss-auth-badge ok';     t.textContent='Líder directo'; n.style.display='none'; }
+  else if (monto<=10000)   { b.className='ss-auth-badge warn';   t.textContent='Líder directo + Finanzas SiteMinder'; n.style.display='none'; }
+  else if (monto<=20000)  { b.className='ss-auth-badge warn';   t.textContent='Líder directo + Finanzas SiteMinder + justificación escrita'; n.style.display='none'; }
+  else                     { b.className='ss-auth-badge danger'; t.textContent='Monto superior a $20,000 — Dirección SiteMinder'; n.style.display='none'; }
 }
 
 function ssRunSA() {
