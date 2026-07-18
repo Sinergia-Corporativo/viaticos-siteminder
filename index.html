@@ -807,9 +807,9 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
     const ssMotivo = ssCat === 'equipo'        ? (document.getElementById('ss-motivo-eq')?.value  || '')
                    : ssCat === 'capacitaciones' ? (document.getElementById('ss-motivo-cap')?.value || '') : '';
     const ssM = ssMonto || 0;
-    const ssAuth = ssM <= 0 ? '' : ssM <= 1500 ? 'Líder directo'
-      : ssM <= 5000  ? 'Líder directo + registro BUK'
-      : ssM <= 15000 ? 'Finanzas SiteMinder + justificación escrita'
+    const ssAuth = ssM <= 0 ? '' : ssM <= 7000 ? 'Líder directo'
+      : ssM <= 10000  ? 'Líder directo + Finanzas SiteMinder'
+      : ssM <= 20000 ? 'Líder directo + Finanzas SiteMinder + justificación escrita'
       : 'Finanzas SiteMinder + Dirección SiteMinder (PREVIA)';
     // Sobreescribir payload con valores del DOM
     payload.ss_categoria       = ssCat;
@@ -1016,9 +1016,9 @@ function ssAuthSA(wId, bId, tId, nId, monto) {
   if (monto <= 0) return;
   const b = document.getElementById(bId), t = document.getElementById(tId), n = document.getElementById(nId);
   if (!t) return;
-  if (monto<=1500)        { b.className='ss-auth-badge ok';     t.textContent='Líder directo'; n.style.display='none'; }
-  else if (monto<=5000)   { b.className='ss-auth-badge warn';   t.textContent='Líder directo + registro en BUK'; n.style.display='none'; }
-  else if (monto<=15000)  { b.className='ss-auth-badge warn';   t.textContent='Finanzas SiteMinder + justificación escrita'; n.style.display='none'; }
+  if (monto<=7000)        { b.className='ss-auth-badge ok';     t.textContent='Líder directo'; n.style.display='none'; }
+  else if (monto<=10000)   { b.className='ss-auth-badge warn';   t.textContent='Líder directo + registro en BUK'; n.style.display='none'; }
+  else if (monto<=20000)  { b.className='ss-auth-badge warn';   t.textContent='Finanzas SiteMinder + justificación escrita'; n.style.display='none'; }
   else                     { b.className='ss-auth-badge danger'; t.textContent='Finanzas SiteMinder + Dirección SiteMinder'; n.style.display='flex'; }
 }
 
