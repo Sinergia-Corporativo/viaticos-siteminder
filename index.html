@@ -449,7 +449,7 @@
     <div>
       <div class="cn-name">Tren / autobús / transporte foráneo <span class="en">/ Train, bus or ground transport</span></div>
     </div>
-    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="number" min="0" step="0.01" class="mkt-amt" data-key="aereo" placeholder="0.00"></div>
+    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="text" inputmode="decimal" class="mkt-amt" data-key="aereo" placeholder="0.00"></div>
   </div>
 
   <div class="row row-mkt">
@@ -457,7 +457,7 @@
       <div class="cn-name">Combustible <span class="en">/ Fuel</span></div>
       <div class="cn-sub">Monto real con comprobante <span class="en">/ Actual amount with receipt</span></div>
     </div>
-    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="number" min="0" step="0.01" class="mkt-amt" data-key="combustible" placeholder="0.00"></div>
+    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="text" inputmode="decimal" class="mkt-amt" data-key="combustible" placeholder="0.00"></div>
   </div>
 
   <div class="row row-mkt">
@@ -465,7 +465,7 @@
       <div class="cn-name">Peajes y casetas <span class="en">/ Tolls</span></div>
       <div class="cn-sub">CFDI a nombre de SiteMinder <span class="en">/ Tax receipt to SiteMinder</span></div>
     </div>
-    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="number" min="0" step="0.01" class="mkt-amt" data-key="casetas" placeholder="0.00"></div>
+    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="text" inputmode="decimal" class="mkt-amt" data-key="casetas" placeholder="0.00"></div>
   </div>
 
   <div class="row row-mkt">
@@ -473,7 +473,7 @@
       <div class="cn-name">Cuotas de capacitación / congresos <span class="en">/ Training or conference fees</span></div>
       <div class="cn-sub">CFDI / factura local <span class="en">/ Tax receipt / local invoice</span></div>
     </div>
-    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="number" min="0" step="0.01" class="mkt-amt" data-key="capacitacion" placeholder="0.00"></div>
+    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="text" inputmode="decimal" class="mkt-amt" data-key="capacitacion" placeholder="0.00"></div>
   </div>
 </div>
 
@@ -486,8 +486,20 @@
   </p>
   <div class="grid-2">
     <div class="field">
-      <label>CLABE interbancaria o número de cuenta <span class="en">/ CLABE or account number</span><span class="req">*</span></label>
-      <input type="text" name="clabe_cuenta" id="clabe-cuenta" placeholder="18 dígitos CLABE o número de cuenta / 18-digit CLABE or account number" maxlength="30">
+      <label>Tipo de dato <span class="en">/ Data type</span><span class="req">*</span></label>
+      <select id="tipo-clabe" onchange="actualizarClabe()">
+        <option value="">— Selecciona / Select —</option>
+        <option value="clabe">CLABE interbancaria (18 dígitos)</option>
+        <option value="tarjeta">Número de tarjeta (16 dígitos)</option>
+        <option value="cuenta">Número de cuenta bancaria</option>
+      </select>
+    </div>
+    <div class="field">
+      <label id="label-clabe">CLABE / Número de tarjeta o cuenta <span class="en">/ CLABE / Card or account number</span><span class="req">*</span></label>
+      <input type="text" inputmode="numeric" name="clabe_cuenta" id="clabe-cuenta"
+             placeholder="Selecciona el tipo primero / Select type first"
+             maxlength="18" pattern="[0-9]+" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+      <span id="clabe-hint" style="font-size:11px;color:var(--muted);margin-top:2px"></span>
     </div>
     <div class="field">
       <label>Banco <span class="en">/ Bank</span><span class="req">*</span></label>
@@ -740,7 +752,7 @@ function recalc() {
     subT += m;
   });
   let subM = 0;
-  document.querySelectorAll('.mkt-amt').forEach(el => { subM += parseFloat(el.value) || 0; });
+  document.querySelectorAll('.mkt-amt').forEach(el => { subM += parseFloat((el.dataset.raw !== undefined ? el.dataset.raw : el.value) || 0) || 0; });
   document.getElementById('sub-tope').textContent = fmt(subT);
   document.getElementById('sub-mkt').textContent = fmt(subM);
   document.getElementById('grand').textContent = fmt(subT + subM);
@@ -1177,6 +1189,56 @@ function recalcSS() {
   const el=document.querySelector('.total-amount');
   if(el) el.textContent='$'+Math.round(total).toLocaleString('es-MX');
 }
+
+
+function actualizarClabe() {
+  const tipo = document.getElementById('tipo-clabe').value;
+  const input = document.getElementById('clabe-cuenta');
+  const hint  = document.getElementById('clabe-hint');
+  const label = document.getElementById('label-clabe');
+  input.value = '';
+  if (tipo === 'clabe') {
+    input.maxLength = 18; input.placeholder = '18 dígitos / 18 digits';
+    hint.textContent = 'Exactamente 18 dígitos / Exactly 18 digits';
+    label.firstChild.textContent = 'CLABE interbancaria ';
+  } else if (tipo === 'tarjeta') {
+    input.maxLength = 16; input.placeholder = '16 dígitos / 16 digits';
+    hint.textContent = 'Exactamente 16 dígitos / Exactly 16 digits';
+    label.firstChild.textContent = 'Número de tarjeta ';
+  } else if (tipo === 'cuenta') {
+    input.maxLength = 20; input.placeholder = 'Número de cuenta / Account number';
+    hint.textContent = '';
+    label.firstChild.textContent = 'Número de cuenta bancaria ';
+  } else {
+    input.maxLength = 18; input.placeholder = 'Selecciona el tipo primero / Select type first';
+    hint.textContent = ''; label.firstChild.textContent = 'CLABE / Número ';
+  }
+}
+
+// ── Formato MXN para campos de tarifa de mercado ──────────────────────────────
+function mktFmt(el) {
+  // Guardar el valor raw y mostrar con formato
+  const raw = parseFloat(el.value.toString().replace(/,/g, '')) || 0;
+  el.dataset.raw = raw;
+  if (raw > 0) {
+    el.value = raw.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  } else {
+    el.value = '';
+  }
+}
+function mktUnfmt(el) {
+  // Volver al valor numérico para editar
+  el.value = el.dataset.raw || '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.mkt-amt').forEach(el => {
+    el.type = 'text';
+    el.inputMode = 'decimal';
+    el.addEventListener('focus', () => mktUnfmt(el));
+    el.addEventListener('blur',  () => { mktFmt(el); recalc(); });
+  });
+});
 
 </script>
 </body>
