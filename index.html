@@ -144,6 +144,22 @@
   .ss-auth-badge.danger { background: var(--danger-bg); color: var(--danger); }
   .ss-auth-note { font-size: 12px; color: var(--danger); background: var(--danger-bg); border-radius: 7px; padding: 7px 10px; margin-top: 8px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
   .np-na { padding: 10px 12px; background: #F3F5F8; border-radius: 8px; font-size: 14px; color: var(--muted-2); border: 1px solid var(--border); font-style: italic; }
+  .tipo-viaje-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;
+  }
+  .tipo-viaje-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    padding: 16px 10px; border: 2px solid var(--border-strong); border-radius: 10px;
+    background: white; cursor: pointer; font-size: 14px; font-weight: 500;
+    color: var(--muted); transition: all .2s; text-align: center;
+  }
+  .tipo-viaje-btn:hover { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+  .tipo-viaje-btn.active { border-color: var(--navy); background: var(--navy); color: white; }
+  .tipo-viaje-btn .tv-ico { font-size: 26px; }
+  .tipo-viaje-btn .tv-lbl { font-size: 14px; font-weight: 600; }
+  .tipo-viaje-btn .tv-sub { font-size: 11px; opacity: .7; font-weight: 400; }
+  .tipo-viaje-req { font-size: 12px; color: var(--danger-border); margin-bottom: 4px; display: none; font-weight: 500; }
+  .tipo-viaje-req.show { display: block; }
   .aviso-int {
     display: none; align-items: flex-start; gap: 9px;
     background: #EFF6FF; color: #1E40AF; border-radius: 8px;
@@ -316,20 +332,23 @@
 <div class="card">
   <h2><span class="dot"></span>Datos del viaje <span class="en">/ Trip information</span></h2>
   <div class="card-sep"></div>
-  <div class="seg" id="seg-tipo" role="radiogroup" aria-label="Tipo de viaje / Trip type">
-    <button type="button" class="active" data-tipo="Nacional">Nacional / Domestic</button>
-    <button type="button" data-tipo="Internacional">Internacional / International</button>
+  <p style="font-size:12px;color:var(--muted);font-weight:500;margin:0 0 6px">
+    Tipo de viaje <span class="en">/ Trip type</span><span style="color:var(--danger-border);margin-left:2px">*</span>
+  </p>
+  <div class="tipo-viaje-req" id="tipo-viaje-req">⚠️ Debes seleccionar el tipo de viaje antes de enviar. / Please select the trip type.</div>
+  <div class="tipo-viaje-wrap" id="tipo-viaje-wrap" role="radiogroup">
+    <button type="button" class="tipo-viaje-btn" id="btn-nacional" onclick="setTipoViaje('Nacional')">
+      <span class="tv-ico">🇲🇽</span>
+      <span class="tv-lbl">Nacional / Domestic</span>
+      <span class="tv-sub">Dispersión en tarjeta Minu</span>
+    </button>
+    <button type="button" class="tipo-viaje-btn" id="btn-internacional" onclick="setTipoViaje('Internacional')">
+      <span class="tv-ico">🌍</span>
+      <span class="tv-lbl">Internacional / International</span>
+      <span class="tv-sub">Pago por reembolso</span>
+    </button>
   </div>
-  <input type="hidden" name="tipo_viaje" value="Nacional">
-  <div class="aviso-int" id="aviso-int">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <div>
-      <strong>Viaje internacional — pago por reembolso / International travel — reimbursement</strong><br>
-      Los viáticos internacionales <strong>no se dispersan en Minu</strong>. El colaborador adelanta los gastos y solicita reembolso con CFDI. El monto calculado es referencial.<br>
-      <em style="font-weight:400">International expenses are <strong>not disbursed to Minu</strong>. The employee pays upfront and submits a reimbursement request with CFDI receipts. The calculated amount is for reference.</em>
-    </div>
-  </div>
-
+  <input type="hidden" name="tipo_viaje" id="tipo-viaje-val" value="">
   <div class="grid-2" style="margin-bottom: 12px;">
     <div class="field">
       <label>Destino <span class="en">/ Destination</span><span class="req">*</span></label>
@@ -423,6 +442,14 @@
     Captura el monto estimado en pesos. Sujeto a validación de Finanzas y a comprobación con CFDI.
     <span class="en">Enter the estimated amount in MXN. Subject to Finance approval and tax-receipt validation.</span>
   </p>
+
+  <div class="row row-mkt">
+    <div>
+      <div class="cn-name">Tren / autobús / transporte foráneo <span class="en">/ Train, bus or ground transport</span></div>
+      <div class="cn-sub">Boleto con CFDI a nombre de SiteMinder · No aplica para vuelos (NAVAN es prepago) <span class="en">/ Ticket with CFDI to SiteMinder · Flights excluded (NAVAN is prepaid)</span></div>
+    </div>
+    <input type="number" min="0" step="1" class="mkt-amt" data-key="aereo" placeholder="$0">
+  </div>
 
   <div class="row row-mkt">
     <div>
@@ -674,6 +701,7 @@ const KEY_MAP_TOPE = {
   comunicaciones: 'dias_comunicaciones'
 };
 const KEY_MAP_MKT = {
+  aereo: 'monto_aereo',
   combustible: 'monto_combustible',
   casetas: 'monto_casetas',
   capacitacion: 'monto_capacitacion'
@@ -702,36 +730,35 @@ function recalc() {
   document.getElementById('grand').textContent = fmt(subT + subM);
 }
 
-document.querySelectorAll('#seg-tipo button').forEach(b => b.addEventListener('click', () => {
-  document.querySelectorAll('#seg-tipo button').forEach(x => x.classList.remove('active'));
-  b.classList.add('active');
-  tipo = b.dataset.tipo;
-  document.querySelector('[name="tipo_viaje"]').value = tipo;
+function setTipoViaje(t) {
+  tipo = t;
+  document.getElementById('btn-nacional').classList.toggle('active', t === 'Nacional');
+  document.getElementById('btn-internacional').classList.toggle('active', t === 'Internacional');
+  document.getElementById('tipo-viaje-val').value = t;
+  // Ocultar error si estaba visible
+  document.getElementById('tipo-viaje-req').classList.remove('show');
   // Comunicaciones solo aplica en viajes internacionales
   const comInput = document.querySelector('.qty[data-key="comunicaciones"]');
   if (comInput) {
-    if (tipo === 'Nacional') {
-      comInput.value = '';
-      comInput.disabled = true;
+    if (t === 'Nacional') {
+      comInput.value = ''; comInput.disabled = true;
       comInput.style.opacity = '0.4';
       comInput.title = 'Solo aplica en viajes internacionales / International only';
     } else {
-      comInput.disabled = false;
-      comInput.style.opacity = '1';
-      comInput.title = '';
+      comInput.disabled = false; comInput.style.opacity = '1'; comInput.title = '';
     }
   }
-  // Aviso reembolso y etiqueta según tipo de viaje
+  // Aviso reembolso y etiqueta según tipo
   const avisoInt = document.getElementById('aviso-int');
-  if (avisoInt) avisoInt.classList.toggle('show', tipo === 'Internacional');
+  if (avisoInt) avisoInt.classList.toggle('show', t === 'Internacional');
   const tlEl = document.querySelector('.total-label');
-  if (tlEl && document.getElementById('tipo-solicitud-val').value === 'Viaje') {
-    tlEl.textContent = tipo === 'Internacional'
+  if (tlEl && document.getElementById('tipo-solicitud-val')?.value === 'Viaje') {
+    tlEl.textContent = t === 'Internacional'
       ? 'Total por reembolso / Amount for reimbursement'
       : 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card';
   }
   recalc();
-}));
+}
 
 document.querySelectorAll('.qty, .mkt-amt').forEach(el => el.addEventListener('input', recalc));
 
@@ -771,6 +798,14 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
   const form = e.target;
   if (!form.checkValidity()) {
     form.reportValidity();
+    return;
+  }
+  // Validar que se haya seleccionado tipo de viaje cuando es Viaje
+  const tipoSolCheck = document.getElementById('tipo-solicitud-val')?.value || '';
+  if (tipoSolCheck === 'Viaje' && !tipo) {
+    document.getElementById('tipo-viaje-req').classList.add('show');
+    document.getElementById('tipo-viaje-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    btn.disabled = false; btn.textContent = original;
     return;
   }
   const btn = document.getElementById('btn-submit');
@@ -910,20 +945,19 @@ document.getElementById('vt-form').addEventListener('reset', () => {
     if (ssCatEl) ssCatEl.required = false;
     if (ssFecEl) ssFecEl.required = false;
 
-    // Viaje: reset Nacional
-    document.querySelectorAll('#seg-tipo button').forEach(x => x.classList.remove('active'));
-    document.querySelector('#seg-tipo button[data-tipo="Nacional"]').classList.add('active');
-    tipo = 'Nacional';
-    document.querySelector('[name="tipo_viaje"]').value = 'Nacional';
+    // Viaje: reset tipo de viaje (sin preselección)
+    tipo = '';
+    document.getElementById('btn-nacional')?.classList.remove('active');
+    document.getElementById('btn-internacional')?.classList.remove('active');
+    const tvVal = document.getElementById('tipo-viaje-val');
+    if (tvVal) tvVal.value = '';
+    document.getElementById('tipo-viaje-req')?.classList.remove('show');
     document.getElementById('dias').textContent = '—';
     document.getElementById('ss-dias-evento').textContent = '—';
 
     // Comunicaciones: rehabilitar
     const comInput = document.querySelector('.qty[data-key="comunicaciones"]');
     if (comInput) { comInput.disabled = false; comInput.style.opacity = '1'; }
-    // Aviso reembolso: ocultar al limpiar
-    const avisoIntEl = document.getElementById('aviso-int');
-    if (avisoIntEl) avisoIntEl.classList.remove('show');
 
     // Limpiar urgencia
     ['motivo-urgencia-viaje','motivo-urgencia-ss'].forEach(id => {
@@ -1015,6 +1049,12 @@ function setTipoSol(t) {
     else tl.textContent = tipo === 'Internacional'
       ? 'Total por reembolso / Amount for reimbursement'
       : 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card';
+  }
+  // Comunicaciones: deshabilitar si ya estaba en Nacional al volver a Viaje
+  if (t === 'viaje' && !tipo) {
+    // Sin selección aún — deshabilitar comunicaciones por defecto (se activa al elegir Int)
+    const comI = document.querySelector('.qty[data-key="comunicaciones"]');
+    if (comI) { comI.disabled = true; comI.style.opacity = '0.4'; comI.value = ''; }
   }
   if (t === 'ss') recalcSS(); else recalc();
 }
