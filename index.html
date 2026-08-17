@@ -97,6 +97,9 @@
   .cn-tope .u { font-size: 11px; display: block; color: var(--muted-2); }
   .qty, .mkt-amt { width: 100%; text-align: right; box-sizing: border-box; font-variant-numeric: tabular-nums; }
   .cn-amt { text-align: right; font-size: 16px; font-weight: 600; color: var(--blue); font-variant-numeric: tabular-nums; }
+  .mkt-amt-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 0; }
+  .mkt-amt-prefix { padding: 9px 8px 9px 12px; background: #F3F5F8; border: 1px solid var(--border); border-right: none; border-radius: 8px 0 0 8px; font-size: 14px; color: var(--muted); font-weight: 500; }
+  .mkt-amt { border-radius: 0 8px 8px 0 !important; text-align: right; }
   .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
   .btn { padding: 12px 28px; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--navy); color: white; border: none; border-radius: 8px; transition: background 0.15s; }
   .btn:hover:not(:disabled) { background: var(--navy-dark); }
@@ -403,16 +406,6 @@
     <div class="cn-amt" id="m-alimentacion">$0</div>
   </div>
 
-  <div class="row row-tope" id="row-hospedaje" style="display:none">
-    <div class="cn-block">
-      <div class="cn-name">Hospedaje <span class="en">/ Lodging</span></div>
-      <div class="cn-sub">Reserva por NAVAN (prepago) <span class="en">/ Book via NAVAN (prepaid)</span></div>
-    </div>
-    <div class="cn-tope"><span id="tope-hospedaje">$3,000</span><span class="u">por noche / per night</span></div>
-    <input type="number" min="0" step="1" class="qty" data-key="hospedaje" placeholder="0">
-    <div class="cn-amt" id="m-hospedaje">$0</div>
-  </div>
-
   <div class="row row-tope">
     <div class="cn-block">
       <div class="cn-name">Transporte local (Uber / taxi) <span class="en">/ Local transport</span></div>
@@ -455,9 +448,8 @@
   <div class="row row-mkt">
     <div>
       <div class="cn-name">Tren / autobús / transporte foráneo <span class="en">/ Train, bus or ground transport</span></div>
-      <div class="cn-sub">Boleto con CFDI a nombre de SiteMinder · No aplica para vuelos (NAVAN es prepago) <span class="en">/ Ticket with CFDI to SiteMinder · Flights excluded (NAVAN is prepaid)</span></div>
     </div>
-    <input type="number" min="0" step="1" class="mkt-amt" data-key="aereo" placeholder="$0">
+    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="number" min="0" step="0.01" class="mkt-amt" data-key="aereo" placeholder="0.00"></div>
   </div>
 
   <div class="row row-mkt">
@@ -465,7 +457,7 @@
       <div class="cn-name">Combustible <span class="en">/ Fuel</span></div>
       <div class="cn-sub">Monto real con comprobante <span class="en">/ Actual amount with receipt</span></div>
     </div>
-    <input type="number" min="0" step="1" class="mkt-amt" data-key="combustible" placeholder="$0">
+    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="number" min="0" step="0.01" class="mkt-amt" data-key="combustible" placeholder="0.00"></div>
   </div>
 
   <div class="row row-mkt">
@@ -473,7 +465,7 @@
       <div class="cn-name">Peajes y casetas <span class="en">/ Tolls</span></div>
       <div class="cn-sub">CFDI a nombre de SiteMinder <span class="en">/ Tax receipt to SiteMinder</span></div>
     </div>
-    <input type="number" min="0" step="1" class="mkt-amt" data-key="casetas" placeholder="$0">
+    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="number" min="0" step="0.01" class="mkt-amt" data-key="casetas" placeholder="0.00"></div>
   </div>
 
   <div class="row row-mkt">
@@ -481,7 +473,7 @@
       <div class="cn-name">Cuotas de capacitación / congresos <span class="en">/ Training or conference fees</span></div>
       <div class="cn-sub">CFDI / factura local <span class="en">/ Tax receipt / local invoice</span></div>
     </div>
-    <input type="number" min="0" step="1" class="mkt-amt" data-key="capacitacion" placeholder="$0">
+    <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="number" min="0" step="0.01" class="mkt-amt" data-key="capacitacion" placeholder="0.00"></div>
   </div>
 </div>
 
@@ -713,7 +705,6 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwC-xwoTsMJTXln
 
 const TOPES = {
   alimentacion:     { n: 750,  i: 1500, max: null },
-  hospedaje:        { n: 3000, i: 3850, max: null },
   transporte_local: { n: 500,  i: 500,  max: null },
   renta_auto:       { n: 850,  i: 850,  max: 7 },
   comunicaciones:   { n: 0,    i: 500,  max: null }
@@ -789,9 +780,6 @@ function setTipoViaje(t) {
       ? 'Ciudad / país · City / country'
       : 'Ciudad / Estado · City / State (México)';
   }
-  // Hospedaje: ocultar para Nacional (NAVAN prepago), mostrar para Internacional
-  const rowHosp = document.getElementById('row-hospedaje');
-  if (rowHosp) rowHosp.style.display = t === 'Internacional' ? '' : 'none';
   // Sección reembolso bancario: solo para Internacional
   const cardReembolso = document.getElementById('card-reembolso-int');
   if (cardReembolso) {
