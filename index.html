@@ -352,7 +352,7 @@
   <div class="grid-2" style="margin-bottom: 12px;">
     <div class="field">
       <label>Destino <span class="en">/ Destination</span><span class="req">*</span></label>
-      <input type="text" name="destino" required placeholder="Ciudad / país · City / country">
+      <input type="text" name="destino" required placeholder="Ciudad / Estado · City / State (México)" id="destino-input">
     </div>
     <div class="field">
       <label>Motivo del viaje <span class="en">/ Business reason</span><span class="req">*</span></label>
@@ -756,6 +756,13 @@ function setTipoViaje(t) {
     tlEl.textContent = t === 'Internacional'
       ? 'Total por reembolso / Amount for reimbursement'
       : 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card';
+  }
+  // Placeholder de Destino según tipo de viaje
+  const destinoEl = document.getElementById('destino-input');
+  if (destinoEl) {
+    destinoEl.placeholder = t === 'Internacional'
+      ? 'Ciudad / país · City / country'
+      : 'Ciudad / Estado · City / State (México)';
   }
   recalc();
 }
