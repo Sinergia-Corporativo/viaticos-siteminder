@@ -144,6 +144,14 @@
   .ss-auth-badge.danger { background: var(--danger-bg); color: var(--danger); }
   .ss-auth-note { font-size: 12px; color: var(--danger); background: var(--danger-bg); border-radius: 7px; padding: 7px 10px; margin-top: 8px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
   .np-na { padding: 10px 12px; background: #F3F5F8; border-radius: 8px; font-size: 14px; color: var(--muted-2); border: 1px solid var(--border); font-style: italic; }
+  .aviso-int {
+    display: none; align-items: flex-start; gap: 9px;
+    background: #EFF6FF; color: #1E40AF; border-radius: 8px;
+    padding: 11px 15px; font-size: 13px; line-height: 1.55;
+    border-left: 3px solid #3B82F6; margin-bottom: 14px;
+  }
+  .aviso-int.show { display: flex; }
+  .aviso-int svg { flex-shrink: 0; margin-top: 2px; }
   .aviso-2s {
     display: none; align-items: flex-start; gap: 8px;
     background: #FEF3C7; color: #92400E; border-radius: 8px;
@@ -313,6 +321,15 @@
     <button type="button" data-tipo="Internacional">Internacional / International</button>
   </div>
   <input type="hidden" name="tipo_viaje" value="Nacional">
+  <div class="aviso-int" id="aviso-int">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>
+      <strong>Viaje internacional — pago por reembolso / International travel — reimbursement</strong><br>
+      Los viáticos internacionales <strong>no se dispersan en Minu</strong>. El colaborador adelanta los gastos y solicita reembolso con CFDI. El monto calculado es referencial.<br>
+      <em style="font-weight:400">International expenses are <strong>not disbursed to Minu</strong>. The employee pays upfront and submits a reimbursement request with CFDI receipts. The calculated amount is for reference.</em>
+    </div>
+  </div>
+
   <div class="grid-2" style="margin-bottom: 12px;">
     <div class="field">
       <label>Destino <span class="en">/ Destination</span><span class="req">*</span></label>
@@ -406,14 +423,6 @@
     Captura el monto estimado en pesos. Sujeto a validación de Finanzas y a comprobación con CFDI.
     <span class="en">Enter the estimated amount in MXN. Subject to Finance approval and tax-receipt validation.</span>
   </p>
-
-  <div class="row row-mkt">
-    <div>
-      <div class="cn-name">Transporte aéreo / tren / autobús <span class="en">/ Air, train or bus</span></div>
-      <div class="cn-sub">Clase económica · por NAVAN <span class="en">/ Economy class · via NAVAN</span></div>
-    </div>
-    <input type="number" min="0" step="1" class="mkt-amt" data-key="aereo" placeholder="$0">
-  </div>
 
   <div class="row row-mkt">
     <div>
@@ -665,7 +674,6 @@ const KEY_MAP_TOPE = {
   comunicaciones: 'dias_comunicaciones'
 };
 const KEY_MAP_MKT = {
-  aereo: 'monto_aereo',
   combustible: 'monto_combustible',
   casetas: 'monto_casetas',
   capacitacion: 'monto_capacitacion'
@@ -712,6 +720,15 @@ document.querySelectorAll('#seg-tipo button').forEach(b => b.addEventListener('c
       comInput.style.opacity = '1';
       comInput.title = '';
     }
+  }
+  // Aviso reembolso y etiqueta según tipo de viaje
+  const avisoInt = document.getElementById('aviso-int');
+  if (avisoInt) avisoInt.classList.toggle('show', tipo === 'Internacional');
+  const tlEl = document.querySelector('.total-label');
+  if (tlEl && document.getElementById('tipo-solicitud-val').value === 'Viaje') {
+    tlEl.textContent = tipo === 'Internacional'
+      ? 'Total por reembolso / Amount for reimbursement'
+      : 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card';
   }
   recalc();
 }));
@@ -904,6 +921,9 @@ document.getElementById('vt-form').addEventListener('reset', () => {
     // Comunicaciones: rehabilitar
     const comInput = document.querySelector('.qty[data-key="comunicaciones"]');
     if (comInput) { comInput.disabled = false; comInput.style.opacity = '1'; }
+    // Aviso reembolso: ocultar al limpiar
+    const avisoIntEl = document.getElementById('aviso-int');
+    if (avisoIntEl) avisoIntEl.classList.remove('show');
 
     // Limpiar urgencia
     ['motivo-urgencia-viaje','motivo-urgencia-ss'].forEach(id => {
@@ -990,7 +1010,12 @@ function setTipoSol(t) {
   }
 
   const tl = document.querySelector('.total-label');
-  if (tl) tl.textContent = t === 'ss' ? 'Monto del evento / Event amount' : 'Total a dispersar / Amount to disburse';
+  if (tl) {
+    if (t === 'ss') tl.textContent = 'Monto del evento / Event amount';
+    else tl.textContent = tipo === 'Internacional'
+      ? 'Total por reembolso / Amount for reimbursement'
+      : 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card';
+  }
   if (t === 'ss') recalcSS(); else recalc();
 }
 
