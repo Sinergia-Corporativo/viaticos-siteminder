@@ -372,6 +372,17 @@
     </div>
   </div>
 
+  <div class="aviso-2s" id="aviso-viaje-2s">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div class="aviso-2s-inner">
+      ⚠️ Esta solicitud se está enviando con <strong>menos de 2 semanas de anticipación</strong> (política 10.1). Es necesario justificar el motivo de urgencia.<br>
+      <em style="font-weight:400">This request is being submitted with less than 2 weeks' notice (policy 10.1). An emergency justification is required.</em>
+      <span class="urgencia-label">Motivo de urgencia / Emergency reason <span style="color:#DC2626">*</span></span>
+      <textarea class="urgencia-input" id="motivo-urgencia-viaje" name="motivo_urgencia"
+        placeholder="Describe brevemente por qué no fue posible enviar con anticipación... / Briefly explain why advance notice was not possible..."></textarea>
+    </div>
+  </div>
+
 </div>
 
 <div class="card">
@@ -392,7 +403,7 @@
     <div class="cn-amt" id="m-alimentacion">$0</div>
   </div>
 
-  <div class="row row-tope">
+  <div class="row row-tope" id="row-hospedaje" style="display:none">
     <div class="cn-block">
       <div class="cn-name">Hospedaje <span class="en">/ Lodging</span></div>
       <div class="cn-sub">Reserva por NAVAN (prepago) <span class="en">/ Book via NAVAN (prepaid)</span></div>
@@ -473,16 +484,32 @@
     <input type="number" min="0" step="1" class="mkt-amt" data-key="capacitacion" placeholder="$0">
   </div>
 </div>
-  <div class="aviso-2s" id="aviso-viaje-2s">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    <div class="aviso-2s-inner">
-      ⚠️ Esta solicitud se está enviando con <strong>menos de 2 semanas de anticipación</strong> (política 10.1). Es necesario justificar el motivo de urgencia.<br>
-      <em style="font-weight:400">This request is being submitted with less than 2 weeks' notice (policy 10.1). An emergency justification is required.</em>
-      <span class="urgencia-label">Motivo de urgencia / Emergency reason <span style="color:#DC2626">*</span></span>
-      <textarea class="urgencia-input" id="motivo-urgencia-viaje" name="motivo_urgencia"
-        placeholder="Describe brevemente por qué no fue posible enviar con anticipación... / Briefly explain why advance notice was not possible..."></textarea>
+
+<div class="card" id="card-reembolso-int" style="display:none">
+  <h2><span class="dot"></span>Datos para reembolso <span class="en">/ Reimbursement details</span></h2>
+  <div class="card-sep"></div>
+  <p class="hint">
+    Los viáticos internacionales se pagan por reembolso. Proporciona tus datos bancarios para recibir el pago una vez aprobada la conciliación.
+    <span class="en">International travel expenses are reimbursed. Provide your bank details to receive payment once reconciliation is approved.</span>
+  </p>
+  <div class="grid-2">
+    <div class="field">
+      <label>CLABE interbancaria o número de cuenta <span class="en">/ CLABE or account number</span><span class="req">*</span></label>
+      <input type="text" name="clabe_cuenta" id="clabe-cuenta" placeholder="18 dígitos CLABE o número de cuenta / 18-digit CLABE or account number" maxlength="30">
+    </div>
+    <div class="field">
+      <label>Banco <span class="en">/ Bank</span><span class="req">*</span></label>
+      <input type="text" name="banco_reembolso" id="banco-reembolso" placeholder="Nombre del banco / Bank name">
+    </div>
+    <div class="field" style="grid-column:1/-1">
+      <label>Titular de la cuenta <span class="en">/ Account holder name</span><span class="req">*</span></label>
+      <input type="text" name="titular_cuenta" id="titular-cuenta" placeholder="Nombre completo como aparece en la cuenta / Full name as it appears on the account">
     </div>
   </div>
+  <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:10px 12px;background:var(--blue-light);border-radius:6px;border-left:3px solid var(--blue)">
+    <strong>Nota:</strong> Esta información es únicamente para fines de reembolso. Se validará contra los comprobantes CFDI presentados en BUK antes de procesar el pago. / <em>This information is for reimbursement purposes only. It will be validated against CFDI receipts submitted in BUK before payment is processed.</em>
+  </div>
+</div>
 </div><!-- /modo-viaje -->
 
 <!-- ── MODO STAYING SOCIAL STANDALONE ── -->
@@ -762,6 +789,19 @@ function setTipoViaje(t) {
       ? 'Ciudad / país · City / country'
       : 'Ciudad / Estado · City / State (México)';
   }
+  // Hospedaje: ocultar para Nacional (NAVAN prepago), mostrar para Internacional
+  const rowHosp = document.getElementById('row-hospedaje');
+  if (rowHosp) rowHosp.style.display = t === 'Internacional' ? '' : 'none';
+  // Sección reembolso bancario: solo para Internacional
+  const cardReembolso = document.getElementById('card-reembolso-int');
+  if (cardReembolso) {
+    cardReembolso.style.display = t === 'Internacional' ? 'block' : 'none';
+    // Required solo cuando está visible
+    ['clabe-cuenta','banco-reembolso','titular-cuenta'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.required = (t === 'Internacional');
+    });
+  }
   recalc();
 }
 
@@ -884,6 +924,14 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
     payload.ss_categoria = ''; payload.ss_tipo_actividad = '';
     payload.ss_num_personas = ''; payload.ss_fecha_inicio = '';
     payload.ss_fecha_fin = ''; payload.ss_dias_evento = '';
+  }
+  // Datos bancarios para reembolso (solo internacionales)
+  if (tipoSol === 'Viaje' && payload.tipo_viaje === 'Internacional') {
+    payload.clabe_cuenta    = document.getElementById('clabe-cuenta')?.value    || '';
+    payload.banco_reembolso = document.getElementById('banco-reembolso')?.value  || '';
+    payload.titular_cuenta  = document.getElementById('titular-cuenta')?.value   || '';
+  } else {
+    payload.clabe_cuenta = ''; payload.banco_reembolso = ''; payload.titular_cuenta = '';
   }
 
   // Generar ID en cliente (mismo formato que el servidor)
