@@ -522,6 +522,22 @@
   <h2><span class="dot"></span>Datos del evento <span class="en">/ Event details</span></h2>
   <div class="card-sep"></div>
 
+  <p style="font-size:12px;color:var(--muted);font-weight:500;margin:0 0 6px">
+    ¿El evento es en México o en el extranjero? <span class="en">/ Is the event in Mexico or abroad?</span><span style="color:var(--danger-border);margin-left:2px">*</span>
+  </p>
+  <div class="tipo-viaje-req" id="ss-tipo-ubicacion-req">⚠️ Debes seleccionar si el evento es nacional o internacional. / Please select whether the event is domestic or international.</div>
+  <div class="tipo-viaje-wrap" id="ss-tipo-ubicacion-wrap" role="radiogroup">
+    <button type="button" class="tipo-viaje-btn" id="ss-btn-nacional" onclick="setSSTipoUbicacion('Nacional')">
+      <span class="tv-ico">🇲🇽</span>
+      <span><span class="tv-lbl">Nacional / Domestic</span><span class="tv-sub">Dispersión en tarjeta Minu</span></span>
+    </button>
+    <button type="button" class="tipo-viaje-btn" id="ss-btn-internacional" onclick="setSSTipoUbicacion('Internacional')">
+      <span class="tv-ico">🌍</span>
+      <span><span class="tv-lbl">Internacional / International</span><span class="tv-sub">Monto estimado</span></span>
+    </button>
+  </div>
+  <input type="hidden" name="ss_tipo_ubicacion" id="ss-tipo-ubicacion-val" value="">
+
   <div class="grid-2" style="margin-bottom:14px">
     <div class="field">
       <label>Staying Social <span class="en">/ Event category</span><span class="req">*</span></label>
@@ -853,6 +869,11 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
     btn.disabled = false; btn.textContent = original;
     return;
   }
+  if (tipoSolCheck === 'Staying Social' && !ssTipoUbicacion) {
+    document.getElementById('ss-tipo-ubicacion-req').classList.add('show');
+    document.getElementById('ss-tipo-ubicacion-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
   const btn = document.getElementById('btn-submit');
   const status = document.getElementById('status');
   status.className = 'status';
@@ -1025,6 +1046,14 @@ document.getElementById('vt-form').addEventListener('reset', () => {
     ['ss-subsec-sa','ss-eq-sa','ss-rep-sa','ss-cap-sa'].forEach(id => {
       const el = document.getElementById(id); if (el) el.style.display = 'none';
     });
+
+    // SS standalone: reset Nacional/Internacional
+    ssTipoUbicacion = '';
+    document.getElementById('ss-btn-nacional')?.classList.remove('active');
+    document.getElementById('ss-btn-internacional')?.classList.remove('active');
+    const ssTvVal = document.getElementById('ss-tipo-ubicacion-val');
+    if (ssTvVal) ssTvVal.value = '';
+    document.getElementById('ss-tipo-ubicacion-req')?.classList.remove('show');
     const ssNpEl = document.getElementById('ss-np-sa');
     if (ssNpEl) ssNpEl.style.display = 'block';
     const ssNaNpEl = document.getElementById('ss-np-na-sa');
@@ -1041,6 +1070,14 @@ document.getElementById('vt-form').addEventListener('reset', () => {
     // Status
     document.getElementById('status').className = 'status';
 
+    // Tarifa de mercado: limpiar el valor "crudo" cacheado en dataset.raw.
+    // El reset nativo del <form> solo limpia el .value visible, no el dataset,
+    // así que sin esto recalc() seguía sumando el monto viejo.
+    document.querySelectorAll('.mkt-amt').forEach(el => {
+      el.dataset.raw = '';
+      el.value = '';
+    });
+
     recalc();
   }, 0);
 });
@@ -1050,6 +1087,21 @@ recalc();
 /* ── Staying Social logic ── */
 /* ── GLOBAL: Tipo de solicitud ── */
 let tipoSolicitud = '';
+let ssTipoUbicacion = '';
+
+function setSSTipoUbicacion(t) {
+  ssTipoUbicacion = t;
+  document.getElementById('ss-btn-nacional').classList.toggle('active', t === 'Nacional');
+  document.getElementById('ss-btn-internacional').classList.toggle('active', t === 'Internacional');
+  document.getElementById('ss-tipo-ubicacion-val').value = t;
+  document.getElementById('ss-tipo-ubicacion-req').classList.remove('show');
+  const tlEl = document.querySelector('.total-label');
+  if (tlEl && document.getElementById('tipo-solicitud-val')?.value === 'Staying Social') {
+    tlEl.textContent = t === 'Internacional'
+      ? 'Monto estimado (referencial) / Estimated amount'
+      : 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card';
+  }
+}
 
 function setTipoSol(t) {
   tipoSolicitud = t;
@@ -1098,8 +1150,13 @@ function setTipoSol(t) {
 
   const tl = document.querySelector('.total-label');
   if (tl) {
-    if (t === 'ss') tl.textContent = 'Monto del evento / Event amount';
-    else tl.textContent = tipo === 'Internacional'
+    if (t === 'ss') {
+      tl.textContent = ssTipoUbicacion === 'Internacional'
+        ? 'Monto estimado (referencial) / Estimated amount'
+        : ssTipoUbicacion === 'Nacional'
+          ? 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card'
+          : 'Monto del evento / Event amount';
+    } else tl.textContent = tipo === 'Internacional'
       ? 'Total por reembolso / Amount for reimbursement'
       : 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card';
   }
