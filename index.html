@@ -1113,6 +1113,20 @@ function setTipoSol(t) {
   const hiddenTipo = document.getElementById('tipo-solicitud-val');
   if (hiddenTipo) hiddenTipo.value = t === 'viaje' ? 'Viaje' : 'Staying Social';
 
+  // Datos de reembolso (CLABE/banco/titular): solo aplican a Viaje Internacional.
+  // Si el usuario ya había pasado por Viaje→Internacional antes de cambiar a Staying
+  // Social, estos campos se quedaban "required" aunque ocultos, y eso bloqueaba el
+  // envío sin mostrar ningún aviso (campo requerido pero no enfocable). Al cambiar
+  // de modo, siempre se resetean.
+  if (t !== 'viaje') {
+    const cardReembolso = document.getElementById('card-reembolso-int');
+    if (cardReembolso) cardReembolso.style.display = 'none';
+    ['clabe-cuenta','banco-reembolso','titular-cuenta'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.required = false;
+    });
+  }
+
   // ── Campos requeridos: activar solo los del modo visible ─────────────────
   // Viaje: destino, motivo, fecha_salida, fecha_regreso
   ['destino','motivo'].forEach(name => {
