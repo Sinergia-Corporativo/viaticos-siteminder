@@ -866,7 +866,6 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
   if (tipoSolCheck === 'Viaje' && !tipo) {
     document.getElementById('tipo-viaje-req').classList.add('show');
     document.getElementById('tipo-viaje-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    btn.disabled = false; btn.textContent = original;
     return;
   }
   if (tipoSolCheck === 'Staying Social' && !ssTipoUbicacion) {
