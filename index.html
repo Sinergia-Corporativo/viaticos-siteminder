@@ -218,13 +218,13 @@
 </div>
 
 <p class="subtitle">
-  Llena la información de tu viaje. El monto se calcula automáticamente conforme al Anexo B y se dispersa en tu tarjeta Minu.
-  <span class="en">Fill in your travel information. The amount is calculated automatically per Annex B and disbursed to your Minu card.</span>
+  Llena la información de tu viaje. El monto se calcula automáticamente conforme al Anexo B y se paga por reembolso.
+  <span class="en">Fill in your travel information. The amount is calculated automatically per Annex B and paid by reimbursement.</span>
 </p>
 
 <div class="total-card">
   <div>
-    <p class="total-label">Total a dispersar en tarjeta Minu / Total to disburse on Minu card</p>
+    <p class="total-label">Monto estimado a reembolso / Estimated reimbursement amount</p>
     <p class="total-amount" id="grand">$0</p>
   </div>
   <div class="total-side">
@@ -342,11 +342,11 @@
   <div class="tipo-viaje-wrap" id="tipo-viaje-wrap" role="radiogroup">
     <button type="button" class="tipo-viaje-btn" id="btn-nacional" onclick="setTipoViaje('Nacional')">
       <span class="tv-ico">🇲🇽</span>
-      <span><span class="tv-lbl">Nacional / Domestic</span><span class="tv-sub">Dispersión en tarjeta Minu</span></span>
+      <span><span class="tv-lbl">Nacional / Domestic</span><span class="tv-sub">Aplican topes nacionales</span></span>
     </button>
     <button type="button" class="tipo-viaje-btn" id="btn-internacional" onclick="setTipoViaje('Internacional')">
       <span class="tv-ico">🌍</span>
-      <span><span class="tv-lbl">Internacional / International</span><span class="tv-sub">Pago por reembolso</span></span>
+      <span><span class="tv-lbl">Internacional / International</span><span class="tv-sub">Aplican topes internacionales</span></span>
     </button>
   </div>
   <input type="hidden" name="tipo_viaje" id="tipo-viaje-val" value="">
@@ -476,44 +476,6 @@
     <div class="mkt-amt-wrap"><span class="mkt-amt-prefix">$</span><input type="text" inputmode="decimal" class="mkt-amt" data-key="capacitacion" placeholder="0.00"></div>
   </div>
 </div>
-
-<div class="card" id="card-reembolso-int" style="display:none">
-  <h2><span class="dot"></span>Datos para reembolso <span class="en">/ Reimbursement details</span></h2>
-  <div class="card-sep"></div>
-  <p class="hint">
-    Los viáticos internacionales se pagan por reembolso. Proporciona tus datos bancarios para recibir el pago una vez aprobada la conciliación.
-    <span class="en">International travel expenses are reimbursed. Provide your bank details to receive payment once reconciliation is approved.</span>
-  </p>
-  <div class="grid-2">
-    <div class="field">
-      <label>Tipo de dato <span class="en">/ Data type</span><span class="req">*</span></label>
-      <select id="tipo-clabe" onchange="actualizarClabe()">
-        <option value="">— Selecciona / Select —</option>
-        <option value="clabe">CLABE interbancaria (18 dígitos)</option>
-        <option value="tarjeta">Número de tarjeta (16 dígitos)</option>
-        <option value="cuenta">Número de cuenta bancaria</option>
-      </select>
-    </div>
-    <div class="field">
-      <label id="label-clabe">CLABE / Número de tarjeta o cuenta <span class="en">/ CLABE / Card or account number</span><span class="req">*</span></label>
-      <input type="text" inputmode="numeric" name="clabe_cuenta" id="clabe-cuenta"
-             placeholder="Selecciona el tipo primero / Select type first"
-             maxlength="18" pattern="[0-9]+" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-      <span id="clabe-hint" style="font-size:11px;color:var(--muted);margin-top:2px"></span>
-    </div>
-    <div class="field">
-      <label>Banco <span class="en">/ Bank</span><span class="req">*</span></label>
-      <input type="text" name="banco_reembolso" id="banco-reembolso" placeholder="Nombre del banco / Bank name">
-    </div>
-    <div class="field" style="grid-column:1/-1">
-      <label>Titular de la cuenta <span class="en">/ Account holder name</span><span class="req">*</span></label>
-      <input type="text" name="titular_cuenta" id="titular-cuenta" placeholder="Nombre completo como aparece en la cuenta / Full name as it appears on the account">
-    </div>
-  </div>
-  <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:10px 12px;background:var(--blue-light);border-radius:6px;border-left:3px solid var(--blue)">
-    <strong>Nota:</strong> Esta información es únicamente para fines de reembolso. Se validará contra los comprobantes CFDI presentados en BUK antes de procesar el pago. / <em>This information is for reimbursement purposes only. It will be validated against CFDI receipts submitted in BUK before payment is processed.</em>
-  </div>
-</div>
 </div><!-- /modo-viaje -->
 
 <!-- ── MODO STAYING SOCIAL STANDALONE ── -->
@@ -521,22 +483,6 @@
 <div class="card">
   <h2><span class="dot"></span>Datos del evento <span class="en">/ Event details</span></h2>
   <div class="card-sep"></div>
-
-  <p style="font-size:12px;color:var(--muted);font-weight:500;margin:0 0 6px">
-    ¿El evento es en México o en el extranjero? <span class="en">/ Is the event in Mexico or abroad?</span><span style="color:var(--danger-border);margin-left:2px">*</span>
-  </p>
-  <div class="tipo-viaje-req" id="ss-tipo-ubicacion-req">⚠️ Debes seleccionar si el evento es nacional o internacional. / Please select whether the event is domestic or international.</div>
-  <div class="tipo-viaje-wrap" id="ss-tipo-ubicacion-wrap" role="radiogroup">
-    <button type="button" class="tipo-viaje-btn" id="ss-btn-nacional" onclick="setSSTipoUbicacion('Nacional')">
-      <span class="tv-ico">🇲🇽</span>
-      <span><span class="tv-lbl">Nacional / Domestic</span><span class="tv-sub">Dispersión en tarjeta Minu</span></span>
-    </button>
-    <button type="button" class="tipo-viaje-btn" id="ss-btn-internacional" onclick="setSSTipoUbicacion('Internacional')">
-      <span class="tv-ico">🌍</span>
-      <span><span class="tv-lbl">Internacional / International</span><span class="tv-sub">Monto estimado</span></span>
-    </button>
-  </div>
-  <input type="hidden" name="ss_tipo_ubicacion" id="ss-tipo-ubicacion-val" value="">
 
   <div class="grid-2" style="margin-bottom:14px">
     <div class="field">
@@ -711,10 +657,48 @@
 </div>
 </div><!-- /modo-ss -->
 
+<div class="card">
+  <h2><span class="dot"></span>Datos para reembolso <span class="en">/ Reimbursement details</span></h2>
+  <div class="card-sep"></div>
+  <p class="hint">
+    Todos los viáticos se pagan por reembolso. Proporciona tus datos bancarios para recibir el pago una vez validados tus comprobantes.
+    <span class="en">All travel expenses are paid by reimbursement. Provide your bank details to receive payment once your receipts are validated.</span>
+  </p>
+  <div class="grid-2">
+    <div class="field">
+      <label>Tipo de dato <span class="en">/ Data type</span><span class="req">*</span></label>
+      <select id="tipo-clabe" onchange="actualizarClabe()" required>
+        <option value="">— Selecciona / Select —</option>
+        <option value="clabe">CLABE interbancaria (18 dígitos)</option>
+        <option value="tarjeta">Número de tarjeta (16 dígitos)</option>
+        <option value="cuenta">Número de cuenta bancaria</option>
+      </select>
+    </div>
+    <div class="field">
+      <label id="label-clabe">CLABE / Número de tarjeta o cuenta <span class="en">/ CLABE / Card or account number</span><span class="req">*</span></label>
+      <input type="text" inputmode="numeric" name="clabe_cuenta" id="clabe-cuenta" required
+             placeholder="Selecciona el tipo primero / Select type first"
+             maxlength="18" pattern="[0-9]+" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+      <span id="clabe-hint" style="font-size:11px;color:var(--muted);margin-top:2px"></span>
+    </div>
+    <div class="field">
+      <label>Banco <span class="en">/ Bank</span><span class="req">*</span></label>
+      <input type="text" name="banco_reembolso" id="banco-reembolso" required placeholder="Nombre del banco / Bank name">
+    </div>
+    <div class="field" style="grid-column:1/-1">
+      <label>Titular de la cuenta <span class="en">/ Account holder name</span><span class="req">*</span></label>
+      <input type="text" name="titular_cuenta" id="titular-cuenta" required placeholder="Nombre completo como aparece en la cuenta / Full name as it appears on the account">
+    </div>
+  </div>
+  <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:10px 12px;background:var(--blue-light);border-radius:6px;border-left:3px solid var(--blue)">
+    <strong>Nota:</strong> Esta información es únicamente para fines de reembolso. Se validará contra los comprobantes CFDI subidos en MiSiteMinder antes de procesar el pago. / <em>This information is for reimbursement purposes only. It will be validated against CFDI receipts uploaded in MiSiteMinder before payment is processed.</em>
+  </div>
+</div>
+
 <div class="footer-note">
   <strong>Importante / Important.</strong>
-  Este formato debe enviarse con al menos dos semanas de anticipación, salvo viajes de emergencia (sección 10.1 de la política). El monto aprobado se dispersa en tu tarjeta Minu. La tarjeta es medio de pago; no sustituye la comprobación con CFDI conforme a la sección 7.
-  <span class="en">Submit this form at least two weeks before your trip, except for emergency travel (policy section 10.1). The approved amount is disbursed to your Minu card. The card is a payment method; it does not replace tax-receipt (CFDI) substantiation per section 7.</span>
+  Este formato debe enviarse con al menos dos semanas de anticipación, salvo viajes de emergencia (sección 10.1 de la política). El monto es un estimado sujeto a comprobación con CFDI; el reembolso se paga en la segunda quincena del mes del corte, vía nómina de SiteMinder.
+  <span class="en">Submit this form at least two weeks before your trip, except for emergency travel (policy section 10.1). The amount is an estimate subject to CFDI substantiation; the reimbursement is paid in the second pay period of the cutoff month, through SiteMinder's payroll.</span>
 </div>
 
 <div class="status" id="status" role="alert" aria-live="polite"></div>
@@ -792,31 +776,12 @@ function setTipoViaje(t) {
       comInput.disabled = false; comInput.style.opacity = '1'; comInput.title = '';
     }
   }
-  // Aviso reembolso y etiqueta según tipo
-  const avisoInt = document.getElementById('aviso-int');
-  if (avisoInt) avisoInt.classList.toggle('show', t === 'Internacional');
-  const tlEl = document.querySelector('.total-label');
-  if (tlEl && document.getElementById('tipo-solicitud-val')?.value === 'Viaje') {
-    tlEl.textContent = t === 'Internacional'
-      ? 'Total por reembolso / Amount for reimbursement'
-      : 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card';
-  }
   // Placeholder de Destino según tipo de viaje
   const destinoEl = document.getElementById('destino-input');
   if (destinoEl) {
     destinoEl.placeholder = t === 'Internacional'
       ? 'Ciudad / país · City / country'
       : 'Ciudad / Estado · City / State (México)';
-  }
-  // Sección reembolso bancario: solo para Internacional
-  const cardReembolso = document.getElementById('card-reembolso-int');
-  if (cardReembolso) {
-    cardReembolso.style.display = t === 'Internacional' ? 'block' : 'none';
-    // Required solo cuando está visible
-    ['clabe-cuenta','banco-reembolso','titular-cuenta'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.required = (t === 'Internacional');
-    });
   }
   recalc();
 }
@@ -866,11 +831,6 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
   if (tipoSolCheck === 'Viaje' && !tipo) {
     document.getElementById('tipo-viaje-req').classList.add('show');
     document.getElementById('tipo-viaje-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  }
-  if (tipoSolCheck === 'Staying Social' && !ssTipoUbicacion) {
-    document.getElementById('ss-tipo-ubicacion-req').classList.add('show');
-    document.getElementById('ss-tipo-ubicacion-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
   const btn = document.getElementById('btn-submit');
@@ -945,14 +905,10 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
     payload.ss_num_personas = ''; payload.ss_fecha_inicio = '';
     payload.ss_fecha_fin = ''; payload.ss_dias_evento = '';
   }
-  // Datos bancarios para reembolso (solo internacionales)
-  if (tipoSol === 'Viaje' && payload.tipo_viaje === 'Internacional') {
-    payload.clabe_cuenta    = document.getElementById('clabe-cuenta')?.value    || '';
-    payload.banco_reembolso = document.getElementById('banco-reembolso')?.value  || '';
-    payload.titular_cuenta  = document.getElementById('titular-cuenta')?.value   || '';
-  } else {
-    payload.clabe_cuenta = ''; payload.banco_reembolso = ''; payload.titular_cuenta = '';
-  }
+  // Datos bancarios para reembolso (ahora universal — Viaje y Staying Social)
+  payload.clabe_cuenta    = document.getElementById('clabe-cuenta')?.value    || '';
+  payload.banco_reembolso = document.getElementById('banco-reembolso')?.value  || '';
+  payload.titular_cuenta  = document.getElementById('titular-cuenta')?.value   || '';
 
   // Generar ID en cliente (mismo formato que el servidor)
   const tsNow = new Date();
@@ -1046,13 +1002,6 @@ document.getElementById('vt-form').addEventListener('reset', () => {
       const el = document.getElementById(id); if (el) el.style.display = 'none';
     });
 
-    // SS standalone: reset Nacional/Internacional
-    ssTipoUbicacion = '';
-    document.getElementById('ss-btn-nacional')?.classList.remove('active');
-    document.getElementById('ss-btn-internacional')?.classList.remove('active');
-    const ssTvVal = document.getElementById('ss-tipo-ubicacion-val');
-    if (ssTvVal) ssTvVal.value = '';
-    document.getElementById('ss-tipo-ubicacion-req')?.classList.remove('show');
     const ssNpEl = document.getElementById('ss-np-sa');
     if (ssNpEl) ssNpEl.style.display = 'block';
     const ssNaNpEl = document.getElementById('ss-np-na-sa');
@@ -1060,7 +1009,7 @@ document.getElementById('vt-form').addEventListener('reset', () => {
 
     // Etiqueta total
     const tl = document.querySelector('.total-label');
-    if (tl) tl.textContent = 'Total a dispersar / Amount to disburse';
+    if (tl) tl.textContent = 'Monto estimado a reembolso / Estimated reimbursement amount';
 
     // Botón enviar
     const btn = document.getElementById('btn-submit');
@@ -1086,21 +1035,6 @@ recalc();
 /* ── Staying Social logic ── */
 /* ── GLOBAL: Tipo de solicitud ── */
 let tipoSolicitud = '';
-let ssTipoUbicacion = '';
-
-function setSSTipoUbicacion(t) {
-  ssTipoUbicacion = t;
-  document.getElementById('ss-btn-nacional').classList.toggle('active', t === 'Nacional');
-  document.getElementById('ss-btn-internacional').classList.toggle('active', t === 'Internacional');
-  document.getElementById('ss-tipo-ubicacion-val').value = t;
-  document.getElementById('ss-tipo-ubicacion-req').classList.remove('show');
-  const tlEl = document.querySelector('.total-label');
-  if (tlEl && document.getElementById('tipo-solicitud-val')?.value === 'Staying Social') {
-    tlEl.textContent = t === 'Internacional'
-      ? 'Monto estimado (referencial) / Estimated amount'
-      : 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card';
-  }
-}
 
 function setTipoSol(t) {
   tipoSolicitud = t;
@@ -1113,22 +1047,10 @@ function setTipoSol(t) {
   const hiddenTipo = document.getElementById('tipo-solicitud-val');
   if (hiddenTipo) hiddenTipo.value = t === 'viaje' ? 'Viaje' : 'Staying Social';
 
-  // Datos de reembolso (CLABE/banco/titular): solo aplican a Viaje Internacional.
-  // Si el usuario ya había pasado por Viaje→Internacional antes de cambiar a Staying
-  // Social, estos campos se quedaban "required" aunque ocultos, y eso bloqueaba el
-  // envío sin mostrar ningún aviso (campo requerido pero no enfocable). Al cambiar
-  // de modo, siempre se resetean.
-  if (t !== 'viaje') {
-    const cardReembolso = document.getElementById('card-reembolso-int');
-    if (cardReembolso) cardReembolso.style.display = 'none';
-    ['clabe-cuenta','banco-reembolso','titular-cuenta'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.required = false;
-    });
-  }
-
   // ── Campos requeridos: activar solo los del modo visible ─────────────────
-  // Viaje: destino, motivo, fecha_salida, fecha_regreso
+  // (Los datos bancarios de reembolso son universales: quedan fijos como
+  // required en el HTML, sin depender del modo — así se evita el bug de
+  // "required" atorado que teníamos cuando dependían de Viaje/Internacional.)
   ['destino','motivo'].forEach(name => {
     const el = document.querySelector('[name="' + name + '"]');
     if (el) el.required = (t === 'viaje');
@@ -1162,17 +1084,7 @@ function setTipoSol(t) {
   }
 
   const tl = document.querySelector('.total-label');
-  if (tl) {
-    if (t === 'ss') {
-      tl.textContent = ssTipoUbicacion === 'Internacional'
-        ? 'Monto estimado (referencial) / Estimated amount'
-        : ssTipoUbicacion === 'Nacional'
-          ? 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card'
-          : 'Monto del evento / Event amount';
-    } else tl.textContent = tipo === 'Internacional'
-      ? 'Total por reembolso / Amount for reimbursement'
-      : 'Total a dispersar en tarjeta Minu / Amount to disburse on Minu card';
-  }
+  if (tl) tl.textContent = 'Monto estimado a reembolso / Estimated reimbursement amount';
   // Comunicaciones: deshabilitar si ya estaba en Nacional al volver a Viaje
   if (t === 'viaje' && !tipo) {
     // Sin selección aún — deshabilitar comunicaciones por defecto (se activa al elegir Int)
