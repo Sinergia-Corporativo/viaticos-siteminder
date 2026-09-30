@@ -657,44 +657,6 @@
 </div>
 </div><!-- /modo-ss -->
 
-<div class="card">
-  <h2><span class="dot"></span>Datos para reembolso <span class="en">/ Reimbursement details</span></h2>
-  <div class="card-sep"></div>
-  <p class="hint">
-    Todos los viáticos se pagan por reembolso. Proporciona tus datos bancarios para recibir el pago una vez validados tus comprobantes.
-    <span class="en">All travel expenses are paid by reimbursement. Provide your bank details to receive payment once your receipts are validated.</span>
-  </p>
-  <div class="grid-2">
-    <div class="field">
-      <label>Tipo de dato <span class="en">/ Data type</span><span class="req">*</span></label>
-      <select id="tipo-clabe" onchange="actualizarClabe()" required>
-        <option value="">— Selecciona / Select —</option>
-        <option value="clabe">CLABE interbancaria (18 dígitos)</option>
-        <option value="tarjeta">Número de tarjeta (16 dígitos)</option>
-        <option value="cuenta">Número de cuenta bancaria</option>
-      </select>
-    </div>
-    <div class="field">
-      <label id="label-clabe">CLABE / Número de tarjeta o cuenta <span class="en">/ CLABE / Card or account number</span><span class="req">*</span></label>
-      <input type="text" inputmode="numeric" name="clabe_cuenta" id="clabe-cuenta" required
-             placeholder="Selecciona el tipo primero / Select type first"
-             maxlength="18" pattern="[0-9]+" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-      <span id="clabe-hint" style="font-size:11px;color:var(--muted);margin-top:2px"></span>
-    </div>
-    <div class="field">
-      <label>Banco <span class="en">/ Bank</span><span class="req">*</span></label>
-      <input type="text" name="banco_reembolso" id="banco-reembolso" required placeholder="Nombre del banco / Bank name">
-    </div>
-    <div class="field" style="grid-column:1/-1">
-      <label>Titular de la cuenta <span class="en">/ Account holder name</span><span class="req">*</span></label>
-      <input type="text" name="titular_cuenta" id="titular-cuenta" required placeholder="Nombre completo como aparece en la cuenta / Full name as it appears on the account">
-    </div>
-  </div>
-  <div style="font-size:12px;color:var(--muted);margin-top:10px;padding:10px 12px;background:var(--blue-light);border-radius:6px;border-left:3px solid var(--blue)">
-    <strong>Nota:</strong> Esta información es únicamente para fines de reembolso. Se validará contra los comprobantes CFDI subidos en MiSiteMinder antes de procesar el pago. / <em>This information is for reimbursement purposes only. It will be validated against CFDI receipts uploaded in MiSiteMinder before payment is processed.</em>
-  </div>
-</div>
-
 <div class="footer-note">
   <strong>Importante / Important.</strong>
   Este formato debe enviarse con al menos dos semanas de anticipación, salvo viajes de emergencia (sección 10.1 de la política). El monto es un estimado sujeto a comprobación con CFDI; el reembolso se paga en la segunda quincena del mes del corte, vía nómina de SiteMinder.
@@ -905,10 +867,6 @@ document.getElementById('vt-form').addEventListener('submit', async e => {
     payload.ss_num_personas = ''; payload.ss_fecha_inicio = '';
     payload.ss_fecha_fin = ''; payload.ss_dias_evento = '';
   }
-  // Datos bancarios para reembolso (ahora universal — Viaje y Staying Social)
-  payload.clabe_cuenta    = document.getElementById('clabe-cuenta')?.value    || '';
-  payload.banco_reembolso = document.getElementById('banco-reembolso')?.value  || '';
-  payload.titular_cuenta  = document.getElementById('titular-cuenta')?.value   || '';
 
   // Generar ID en cliente (mismo formato que el servidor)
   const tsNow = new Date();
@@ -1170,31 +1128,6 @@ function recalcSS() {
   else if(cat==='capacitaciones') total=parseFloat(document.getElementById('ss-monto-cap-sa').value)||0;
   const el=document.querySelector('.total-amount');
   if(el) el.textContent='$'+Math.round(total).toLocaleString('es-MX');
-}
-
-
-function actualizarClabe() {
-  const tipo = document.getElementById('tipo-clabe').value;
-  const input = document.getElementById('clabe-cuenta');
-  const hint  = document.getElementById('clabe-hint');
-  const label = document.getElementById('label-clabe');
-  input.value = '';
-  if (tipo === 'clabe') {
-    input.maxLength = 18; input.placeholder = '18 dígitos / 18 digits';
-    hint.textContent = 'Exactamente 18 dígitos / Exactly 18 digits';
-    label.firstChild.textContent = 'CLABE interbancaria ';
-  } else if (tipo === 'tarjeta') {
-    input.maxLength = 16; input.placeholder = '16 dígitos / 16 digits';
-    hint.textContent = 'Exactamente 16 dígitos / Exactly 16 digits';
-    label.firstChild.textContent = 'Número de tarjeta ';
-  } else if (tipo === 'cuenta') {
-    input.maxLength = 20; input.placeholder = 'Número de cuenta / Account number';
-    hint.textContent = '';
-    label.firstChild.textContent = 'Número de cuenta bancaria ';
-  } else {
-    input.maxLength = 18; input.placeholder = 'Selecciona el tipo primero / Select type first';
-    hint.textContent = ''; label.firstChild.textContent = 'CLABE / Número ';
-  }
 }
 
 // ── Formato MXN para campos de tarifa de mercado ──────────────────────────────
